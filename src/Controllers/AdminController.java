@@ -1,8 +1,8 @@
 
-package programming3finalproejct;
+package Controllers;
 
-import classes.RegisteredCourses;
-import classes.Student;
+import Models.RegisteredCourses;
+import Models.Student;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -36,9 +36,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import Models.DBConnection;
+import Index.Index;
+import Models.DatabaseFacade;
 
-public class AdminViewController implements Initializable {
-    DBConnection connection;
+public class AdminController implements Initializable {
     Alert alert;
     Map returnMap;
     ObservableList<String> studentList =FXCollections.observableArrayList();
@@ -93,10 +95,14 @@ public class AdminViewController implements Initializable {
     @FXML
     private Button buttonadminlogout;
     
+    
+    DatabaseFacade databaseFacade;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {  
         try {
-            studenIds = connection.getStudentIds();
+            databaseFacade = DatabaseFacade.getDatabaseFacade();
+            studenIds = databaseFacade.getStudentIds();
             for (int i = 0; i < studenIds.length; i++) {
                 studentList.add(studenIds[i]);
             }
@@ -110,14 +116,12 @@ public class AdminViewController implements Initializable {
     
     @FXML
     private void handleTabPaneStudent(Event event) throws ClassNotFoundException, SQLException {
-        connection = DBConnection.getConnection();
-        
         tableColumnStudentId.setCellValueFactory(new PropertyValueFactory<>("studentId"));
         tableColumnStudentName.setCellValueFactory(new PropertyValueFactory<>("studentName"));
         tableColumnStudentPhone.setCellValueFactory(new PropertyValueFactory<>("studentPhone"));
         tableColumnStudentAddress.setCellValueFactory(new PropertyValueFactory<>("studentAddress"));
         
-        tableViewStudent.setItems(connection.getStudent());
+        tableViewStudent.setItems(databaseFacade.getStudent());
     }
     
     @FXML
@@ -125,13 +129,13 @@ public class AdminViewController implements Initializable {
         tableColumnDeleteStudentName.setCellValueFactory(new PropertyValueFactory<>("studentId"));
         tableColumnDeleteStudentId.setCellValueFactory(new PropertyValueFactory<>("studentName"));
         
-        tableViewDeleteStudent.setItems(connection.getStudent());
+        tableViewDeleteStudent.setItems(databaseFacade.getStudent());
     }
     
     @FXML
     private void handleButtonAddNewStudent(ActionEvent event) throws ClassNotFoundException, SQLException {
-        
-        returnMap = connection.addStudent(textFiledStudentId.getText(), textFiledStudentName.getText(),
+        System.out.println(textFiledStudentId.getText());
+        returnMap = databaseFacade.addStudent(textFiledStudentId.getText(), textFiledStudentName.getText(),
                 textFiledStudentPassword.getText(), textFiledStudentPhone.getText(), textFiledStudentAddress.getText());
         if ((boolean)returnMap.get("isAdded")) {
             textFiledStudentId.setText("");
@@ -140,7 +144,7 @@ public class AdminViewController implements Initializable {
             textFiledStudentPhone.setText("");
             textFiledStudentAddress.setText("");
             
-            studenIds = connection.getStudentIds();
+            studenIds = databaseFacade.getStudentIds();
             studentList=FXCollections.observableArrayList();
             for (int i = 0; i < studenIds.length; i++) {
                 studentList.add(studenIds[i]);
@@ -174,6 +178,7 @@ public class AdminViewController implements Initializable {
     
     @FXML
     private void handleTableColumn(MouseEvent event) throws SQLException, ClassNotFoundException {
+        Student dbstudent = new Student();
         if (event.getClickCount()==2) {
             if (tableViewDeleteStudent.getSelectionModel().getSelectedItem()!=null) {
                 alert = new Alert(AlertType.WARNING);
@@ -187,9 +192,9 @@ public class AdminViewController implements Initializable {
                 if (result.get()==okButton) {
                     try{
                         Student student = tableViewDeleteStudent.getSelectionModel().getSelectedItem();
-                        boolean deleted = connection.deleteStudent(student.getStudentId());
+                        boolean deleted = dbstudent.deleteStudent(student.getStudentId());
                         if (deleted) {
-                            studenIds = connection.getStudentIds();
+                            studenIds = dbstudent.getStudentIds();
                             studentList=FXCollections.observableArrayList();
                             for (int i = 0; i < studenIds.length; i++) {
                                 studentList.add(studenIds[i]);
@@ -200,7 +205,7 @@ public class AdminViewController implements Initializable {
                             alert.setContentText("Student Removed Successfully!");
                             alert.setHeaderText(null);
                             alert.showAndWait();
-                            tableViewDeleteStudent.setItems(connection.getStudent());
+                            tableViewDeleteStudent.setItems(dbstudent.getStudent());
                         }
                     }catch(Exception ex){
                         System.out.println("Cannot Delete this student because it has reference to athoer records in precourse table");
@@ -278,16 +283,16 @@ public class AdminViewController implements Initializable {
                         }
                     }
                     if (!enteredText.equalsIgnoreCase("")) {
-                        returnMap = connection.updateStudent(student.getStudentId(), enteredText, updateType);
+                        returnMap = databaseFacade.updateStudent(student.getStudentId(), enteredText, updateType);
                         if (!(boolean)returnMap.get("duplicatedOccurred")) {
                             if ((boolean)returnMap.get("isUpdated")) {
-                                tableViewStudent.setItems(connection.getStudent());
+                                tableViewStudent.setItems(databaseFacade.getStudent());
                                 alert = new Alert(Alert.AlertType.INFORMATION);
                                 alert.setTitle("Success Message");
                                 alert.setContentText("Student Updated Successfully!");
                                 alert.setHeaderText(null);
                                 alert.show();
-                                tableViewStudent.setItems(connection.getStudent());
+                                tableViewStudent.setItems(databaseFacade.getStudent());
                             }
                         }else{
                             alert = new Alert(Alert.AlertType.ERROR);
@@ -304,14 +309,14 @@ public class AdminViewController implements Initializable {
     }
     
     @FXML
-    private void handleComboBoxStudentsCourses(ActionEvent event) throws SQLException {
+    private void handleComboBoxStudentsCourses(ActionEvent event) throws SQLException, ClassNotFoundException {
         String selectedStudent = comboBoxStudentsCourses.getValue();
-        connection.getReisteredCourses(selectedStudent);
+        databaseFacade.getRegisteredCourses(selectedStudent);
         
         tableColumnStudensCoursesCourseName.setCellValueFactory(new PropertyValueFactory<>("coursename"));
         tableColumnStudensCoursesCourseSection.setCellValueFactory(new PropertyValueFactory<>("sectionnumber"));
         
-        tableViewStudensCourses.setItems(connection.getReisteredCourses(selectedStudent));
+        tableViewStudensCourses.setItems(databaseFacade.getRegisteredCourses(selectedStudent));
         vBoxTable.setVisible(true);
         tableViewStudensCourses.setVisible(true);
     }
@@ -325,9 +330,9 @@ public class AdminViewController implements Initializable {
     @FXML
     private void handleButtonAdminLogout(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().
-                                getResource("LoginView.fxml"));
+                                getResource("/Views/LoginView.fxml"));
                         Scene scene = new Scene(root);
-                        Stage stage = MainView.getStage();
+                        Stage stage = Index.getStage();
                         stage.setScene(scene);
                         stage.show();
     }

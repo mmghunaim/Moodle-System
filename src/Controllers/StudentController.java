@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package programming3finalproejct;
+package Controllers;
 
-import classes.Course;
-import classes.RegisteredCourses;
-import classes.Section;
-import classes.Student;
+import Models.Course;
+import Models.RegisteredCourses;
+import Models.Section;
+import Models.Student;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -46,13 +46,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
+import Models.DBConnection;
+import Index.Index;
+import Models.DatabaseFacade;
 
 /**
  * FXML Controller class
  *
  * @author WH1108
  */
-public class StudentViewController implements Initializable {
+public class StudentController implements Initializable {
     Course course;
     Section section;
     String userName;
@@ -135,39 +138,38 @@ public class StudentViewController implements Initializable {
     @FXML
     private Tab tabStudentInfo;
     
+    
+    DatabaseFacade databaseFacade;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        databaseFacade = DatabaseFacade.getDatabaseFacade();
         comboBoxSemesters.setItems(semesterList);
         comboBoxSemesters.setValue("Choose Semester...");
     }    
     
     @FXML
-    private void handleStudentBasicInfo(Event event) throws SQLException {
-        connection = DBConnection.getConnection();
-        
-        Student student = connection.showStudentBasicInfo();
-        textFiledStudentName.setText(student.getStudentName());
-        textFiledStudentAddress.setText(student.getStudentAddress());
-        textFiledStudentLastName.setText(student.getStudentLastName());
-        textFiledStudentEmail.setText(student.getStudentEmail());
-        textFiledStudentId.setText(student.getStudentId());
+    private void handleStudentBasicInfo(Event event) throws SQLException, ClassNotFoundException {
+        Student dbStudent = new Student();
+        Student returnedStudent = dbStudent.showStudentBasicInfo();
+        textFiledStudentName.setText(returnedStudent.getStudentName());
+        textFiledStudentAddress.setText(returnedStudent.getStudentAddress());
+        textFiledStudentLastName.setText(returnedStudent.getStudentLastName());
+        textFiledStudentEmail.setText(returnedStudent.getStudentEmail());
+        textFiledStudentId.setText(returnedStudent.getStudentId());
     }
     
     @FXML
-    private void handelCurrentCourses(Event event) throws ClassNotFoundException, SQLException {
-        
-        connection = DBConnection.getConnection();
-        
+    private void handelCurrentCourses(Event event) throws ClassNotFoundException, SQLException {        
         tableColumnCourseName.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         tableColumnCourseId.setCellValueFactory(new PropertyValueFactory<>("courseId"));
         
-        tableViewCourse.setItems(connection.getCurrentCourses());
+        tableViewCourse.setItems(databaseFacade.getCurrentCourses());
 
     }
     
     @FXML
     private void handleRegisteredCourses(Event event) throws ClassNotFoundException, SQLException {
-        connection = DBConnection.getConnection();
         
         tableColumnCourseNameReg.setCellValueFactory(new PropertyValueFactory<>("coursename"));
         tableColumnCourseStartTime.setCellValueFactory(new PropertyValueFactory<>("starttime"));
@@ -177,13 +179,13 @@ public class StudentViewController implements Initializable {
         tableColumnCourseInstructorName.setCellValueFactory(new PropertyValueFactory<>("instructor"));
         tableColumnCourseDays.setCellValueFactory(new PropertyValueFactory<>("days"));
                 
-        tableViewRegisteredCourses.setItems(connection.registeredCourses());
+        tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
     }
     @FXML
     private void handleUpdateCourses(Event event) throws ClassNotFoundException, SQLException {
         tableColumnDeleteCourseName.setCellValueFactory(new PropertyValueFactory<>("coursename"));
         tableColumnDeleteCourseSectionNumber.setCellValueFactory(new PropertyValueFactory<>("sectionnumber"));
-        tableViewUpdateCourse.setItems(connection.registeredCourses());
+        tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
     }
     @FXML
     private void clickedCourse(MouseEvent event) throws ClassNotFoundException, SQLException {
@@ -205,7 +207,7 @@ public class StudentViewController implements Initializable {
                 tableColumnSectionEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
                 tableColumnDays.setCellValueFactory(new PropertyValueFactory<>("days"));
                 
-                tableViewSection.setItems(connection.getSections(clickedCourse));
+                tableViewSection.setItems(databaseFacade.getSections(clickedCourse));
             }
         }
     }
@@ -225,14 +227,14 @@ public class StudentViewController implements Initializable {
                 alert.getButtonTypes().setAll(okButton,cancelButton);
                 result = alert.showAndWait();
                 if (result.get()==okButton) {
-                    returnMap = connection.addSection(course.getCourseName(), section.getSectionNumber());
+                    returnMap = databaseFacade.addSection(course.getCourseName(), section.getSectionNumber());
                     if ((boolean)returnMap.get("isAdded")) {
                         alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Success Message");
                         alert.setContentText("INSERTED COMPLETE");
                         alert.setHeaderText(null);
                         alert.showAndWait();
-                        tableViewRegisteredCourses.setItems(connection.registeredCourses());
+                        tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
                         tableViewCourse.setVisible(true);
                         tableViewSection.setVisible(false);
                     }else if((boolean)returnMap.get("isExist")){
@@ -279,14 +281,14 @@ public class StudentViewController implements Initializable {
                 alert.getButtonTypes().setAll(okButton,cancelButton);
                 result = alert.showAndWait();
                 if (result.get()==okButton) {
-                    int deleted = connection.deleteSection(courseName, sectionNumber);
+                    int deleted = databaseFacade.deleteSection(courseName, sectionNumber);
                     if (deleted!=0) {
                         alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Success Message");
                         alert.setContentText("REMOVED COMPLETE");
                         alert.setHeaderText(null);
                         alert.showAndWait();
-                        tableViewRegisteredCourses.setItems(connection.registeredCourses());
+                        tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
                     }
                 }
             }
@@ -309,7 +311,7 @@ public class StudentViewController implements Initializable {
                     RegisteredCourses registeredCourses = tableViewUpdateCourse.getSelectionModel().getSelectedItem();
                     String rcName = registeredCourses.getCoursename();
                     int preCourseSectionNumber  = registeredCourses.getSectionnumber();
-                    int[] sections = connection.getArrayofSections(rcName);
+                    int[] sections = databaseFacade.getArrayofSections(rcName);
                     List<Integer> choices = new ArrayList<>();
                     for (int i = 0; i < sections.length; i++) {
                         choices.add(sections[i]);
@@ -321,21 +323,21 @@ public class StudentViewController implements Initializable {
                     Optional<Integer> result = dialog.showAndWait();
                     if (result.isPresent()) {
                         int choosedSections = result.get();
-                        returnMap = connection.updateSection(rcName, choosedSections,preCourseSectionNumber);
+                        returnMap = databaseFacade.updateSection(rcName, choosedSections,preCourseSectionNumber);
                         if ((boolean)returnMap.get("conflict")) {
                             alert = new Alert(Alert.AlertType.ERROR);
                             alert.setTitle("Error Message");
                             alert.setContentText("Conflict With Other Course Exist");
                             alert.setHeaderText(null);
                             alert.showAndWait();
-                            tableViewUpdateCourse.setItems(connection.registeredCourses());
+                            tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
                         }else if((boolean)returnMap.get("updated")){
                             alert = new Alert(Alert.AlertType.INFORMATION);
                             alert.setTitle("Success Message");
                             alert.setContentText("Updated Success");
                             alert.setHeaderText(null);
                             alert.showAndWait();
-                            tableViewUpdateCourse.setItems(connection.registeredCourses());
+                            tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
                         }
                     }else{
                         System.out.println("nothing");
@@ -346,7 +348,7 @@ public class StudentViewController implements Initializable {
     }
 
     @FXML
-    private void handleComboBoxSemesters(ActionEvent event) throws SQLException {
+    private void handleComboBoxSemesters(ActionEvent event) throws SQLException, ClassNotFoundException {
         int semesterNumber = 0 ;
         if (comboBoxSemesters.getValue().equalsIgnoreCase("First Semester of 2017/2018")) {
             semesterNumber=1;
@@ -361,7 +363,7 @@ public class StudentViewController implements Initializable {
         tableColumnGradesCourseName.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         tableColumnGradesCourseGrade.setCellValueFactory(new PropertyValueFactory<>("grade"));
         
-        tableViewGrades.setItems(connection.grades(semesterNumber));
+        tableViewGrades.setItems(databaseFacade.grades(semesterNumber));
         vBoxTable.setVisible(true);
         tableViewGrades.setVisible(true);
     }
@@ -379,9 +381,9 @@ public class StudentViewController implements Initializable {
         textFiledStudentName.setText("");
         //labelStudentId.setText("");
         Parent root = FXMLLoader.load(getClass().
-                                getResource("LoginView.fxml"));
+                                getResource("/Views/LoginView.fxml"));
                         Scene scene = new Scene(root);
-                        Stage stage = MainView.getStage();
+                        Stage stage = Index.getStage();
                         stage.setScene(scene);
                         stage.show();
     }

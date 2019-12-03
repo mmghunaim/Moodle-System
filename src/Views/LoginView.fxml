@@ -12,9 +12,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="171.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="programming3finalproejct.LoginViewController">
+<AnchorPane id="AnchorPane" prefHeight="455.0" prefWidth="766.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.LoginController">
    <children>
-      <GridPane prefHeight="171.0" prefWidth="400.0">
+      <GridPane layoutY="111.0" prefHeight="215.0" prefWidth="766.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -50,7 +50,7 @@
                   <Insets left="100.0" />
                </GridPane.margin>
             </Button>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <FlowPane prefHeight="27.0" prefWidth="202.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <children>
                   <Button fx:id="buttonExit" mnemonicParsing="false" onAction="#handelbuttonExit" prefHeight="35.0" prefWidth="96.0" text="Cancel">
                      <FlowPane.margin>

@@ -1,4 +1,4 @@
-package programming3finalproejct;
+package Index;
 
 import java.io.IOException;
 import javafx.application.Application;
@@ -10,8 +10,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-
-public class MainView extends Application{
+//import Controllers.*;
+public class Index extends Application{
     private static Stage stage;
 
     public static Stage getStage() {
@@ -19,13 +19,13 @@ public class MainView extends Application{
     }
 
     public static void setStage(Stage stage) {
-        MainView.stage = stage;
+        Index.stage = stage;
     }
     
     @Override
     public void start(Stage primaryStage) throws Exception{
         setStage(primaryStage);
-        Parent root = FXMLLoader.load(getClass().getResource("LoginView.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/Views/LoginView.fxml"));
         Scene scene = new Scene(root);
         
         primaryStage.setTitle("Login");
@@ -33,9 +33,7 @@ public class MainView extends Application{
         primaryStage.show();
     }
 
-    /**
-     * @param args the command line arguments
-     */
+    
     public static void main(String[] args) {
         launch(args);
     }

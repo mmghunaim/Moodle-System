@@ -15,15 +15,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="programming3finalproejct.AdminViewController">
+<AnchorPane id="AnchorPane" prefHeight="455.0" prefWidth="766.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.AdminController">
    <children>
-      <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane prefHeight="455.0" prefWidth="766.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
             <Tab text="Basic Info">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <VBox layoutX="122.0" layoutY="64.0" prefHeight="112.0" prefWidth="169.0">
+                        <VBox layoutX="149.0" layoutY="110.0" prefHeight="112.0" prefWidth="227.0">
                            <children>
                               <Label prefHeight="41.0" prefWidth="169.0" text="Admin Name :" textAlignment="CENTER">
                                  <padding>
@@ -46,7 +46,7 @@
                               </Label>
                            </children>
                         </VBox>
-                        <VBox layoutX="300.0" layoutY="64.0" prefHeight="110.0" prefWidth="120.0">
+                        <VBox layoutX="401.0" layoutY="111.0" prefHeight="110.0" prefWidth="236.0">
                            <children>
                               <Label text="admin">
                                  <padding>
@@ -56,7 +56,7 @@
                                     <Font size="15.0" />
                                  </font>
                               </Label>
-                              <Label text="admin">
+                              <Label text="********">
                                  <VBox.margin>
                                     <Insets top="10.0" />
                                  </VBox.margin>
@@ -69,9 +69,9 @@
                               </Label>
                            </children>
                         </VBox>
-                        <VBox layoutX="212.0" layoutY="176.0" prefHeight="148.0" prefWidth="116.0">
+                        <VBox layoutX="260.0" layoutY="257.0" prefHeight="66.0" prefWidth="159.0">
                            <children>
-                              <Button fx:id="buttonadminlogout" mnemonicParsing="false" onAction="#handleButtonAdminLogout" prefHeight="45.0" prefWidth="116.0" text="Logout" />
+                              <Button fx:id="buttonadminlogout" mnemonicParsing="false" onAction="#handleButtonAdminLogout" prefHeight="46.0" prefWidth="135.0" text="Logout" />
                            </children>
                         </VBox>
                      </children>
@@ -82,7 +82,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="tableViewStudent" onMouseClicked="#handleTableColumnUpdate" prefHeight="371.0" prefWidth="600.0">
+                        <TableView fx:id="tableViewStudent" onMouseClicked="#handleTableColumnUpdate" prefHeight="428.0" prefWidth="766.0">
                           <columns>
                             <TableColumn fx:id="tableColumnStudentId" prefWidth="142.0" text="Student ID" />
                             <TableColumn fx:id="tableColumnStudentName" prefWidth="196.0" text="Student Name" />
@@ -97,9 +97,9 @@
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <FlowPane prefHeight="372.0" prefWidth="600.0">
+                        <FlowPane prefHeight="426.0" prefWidth="766.0">
                            <children>
-                              <VBox prefHeight="273.0" prefWidth="287.0">
+                              <VBox prefHeight="285.0" prefWidth="402.0">
                                  <children>
                                     <Label contentDisplay="CENTER" text="Student ID :" textAlignment="CENTER">
                                        <VBox.margin>
@@ -143,7 +143,7 @@
                                     </Label>
                                  </children>
                               </VBox>
-                              <VBox prefHeight="273.0" prefWidth="311.0">
+                              <VBox prefHeight="285.0" prefWidth="358.0">
                                  <children>
                                     <TextField fx:id="textFiledStudentId">
                                        <VBox.margin>
@@ -172,14 +172,14 @@
                                     </TextField>
                                  </children>
                               </VBox>
-                              <VBox prefHeight="96.0" prefWidth="601.0">
+                              <VBox prefHeight="96.0" prefWidth="765.0">
                                  <children>
-                                    <Button fx:id="buttonAddNewStudent" mnemonicParsing="false" onAction="#handleButtonAddNewStudent" prefHeight="30.0" prefWidth="130.0" text="Add New Student">
+                                    <Button fx:id="buttonAddNewStudent" mnemonicParsing="false" onAction="#handleButtonAddNewStudent" prefHeight="30.0" prefWidth="222.0" text="Add New Student">
                                        <VBox.margin>
                                           <Insets bottom="15.0" left="220.0" />
                                        </VBox.margin>
                                     </Button>
-                                    <Button fx:id="buttonCancel" mnemonicParsing="false" onAction="#handleButtonCancel" prefHeight="30.0" prefWidth="131.0" text="Cancel">
+                                    <Button fx:id="buttonCancel" mnemonicParsing="false" onAction="#handleButtonCancel" prefHeight="30.0" prefWidth="223.0" text="Cancel">
                                        <VBox.margin>
                                           <Insets bottom="15.0" left="220.0" />
                                        </VBox.margin>
@@ -196,7 +196,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="tableViewDeleteStudent" layoutX="-1.0" layoutY="-1.0" onMouseClicked="#handleTableColumn" prefHeight="377.0" prefWidth="607.0">
+                        <TableView fx:id="tableViewDeleteStudent" onMouseClicked="#handleTableColumn" prefHeight="426.0" prefWidth="766.0">
                           <columns>
                             <TableColumn fx:id="tableColumnDeleteStudentName" prefWidth="291.0" text="Student Name" />
                             <TableColumn fx:id="tableColumnDeleteStudentId" prefWidth="203.0" text="Student ID" />

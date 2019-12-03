@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package programming3finalproejct;
+package Controllers;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,13 +22,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import Models.DBConnection;
+import Index.Index;
 
 /**
  * FXML Controller class
  *
  * @author WH1108
  */
-public class LoginViewController implements Initializable {
+public class LoginController implements Initializable {
 
     @FXML
     private Label labelName;
@@ -61,17 +63,17 @@ public class LoginViewController implements Initializable {
                 String loginType = (String)returnMap.get("loginType");
                 if(loginType.equalsIgnoreCase("admin")){
                     Parent root = FXMLLoader.load(getClass().
-                            getResource("AdminView.fxml"));
+                            getResource("/Views/AdminView.fxml"));
                     Scene scene = new Scene(root);
-                    Stage stage = MainView.getStage();
+                    Stage stage = Index.getStage();
                     stage.setScene(scene);
                     stage.show();
                 }else{
                     if (!(boolean)returnMap.get("failedLogin")) {
                         Parent root = FXMLLoader.load(getClass().
-                                getResource("StudentView.fxml"));
+                                getResource("/Views/StudentView.fxml"));
                         Scene scene = new Scene(root);
-                        Stage stage = MainView.getStage();
+                        Stage stage = Index.getStage();
                         stage.setScene(scene);
                         stage.show();
                     }else{
@@ -96,9 +98,9 @@ public class LoginViewController implements Initializable {
 
     private void handleButtonSignUp(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().
-                getResource("SignUp.fxml"));
+                getResource("/Views/SignUp.fxml"));
                 Scene scene = new Scene(root);
-                Stage stage = MainView.getStage();
+                Stage stage = Index.getStage();
                 stage.setScene(scene);
                 stage.show();
     }
