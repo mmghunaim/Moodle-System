@@ -11,7 +11,9 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 //import Controllers.*;
-public class Index extends Application{
+
+public class Index extends Application {
+
     private static Stage stage;
 
     public static Stage getStage() {
@@ -21,19 +23,18 @@ public class Index extends Application{
     public static void setStage(Stage stage) {
         Index.stage = stage;
     }
-    
+
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         setStage(primaryStage);
         Parent root = FXMLLoader.load(getClass().getResource("/Views/LoginView.fxml"));
         Scene scene = new Scene(root);
-        
+
         primaryStage.setTitle("Login");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    
     public static void main(String[] args) {
         launch(args);
     }

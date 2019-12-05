@@ -25,8 +25,6 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -49,6 +47,7 @@ import javax.swing.JOptionPane;
 import Models.DBConnection;
 import Index.Index;
 import Models.DatabaseFacade;
+import Views.ViewFactory;
 
 /**
  * FXML Controller class
@@ -56,16 +55,17 @@ import Models.DatabaseFacade;
  * @author WH1108
  */
 public class StudentController implements Initializable {
+
     Course course;
     Section section;
     String userName;
     DBConnection connection;
     Optional<ButtonType> result;
-    private Alert alert ;
+    private Alert alert;
     Map returnMap;
-    
-    ObservableList<String> semesterList =FXCollections.observableArrayList("First Semester of 2017/2018","Second Semester of 2017/2018",
-    "First Semester of 2018/2019","Second Semester of 2018/2019");
+
+    ObservableList<String> semesterList = FXCollections.observableArrayList("First Semester of 2017/2018", "Second Semester of 2017/2018",
+            "First Semester of 2018/2019", "Second Semester of 2018/2019");
     @FXML
     private Tab tabPaneCurrentCourses;
     private TextArea textAreaCurrent;
@@ -137,17 +137,17 @@ public class StudentController implements Initializable {
     private TextField textFiledStudentEmail;
     @FXML
     private Tab tabStudentInfo;
-    
-    
+
     DatabaseFacade databaseFacade;
-    
+    ViewFactory viewFactory;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         databaseFacade = DatabaseFacade.getDatabaseFacade();
+        viewFactory = ViewFactory.getViewFactory();
         comboBoxSemesters.setItems(semesterList);
         comboBoxSemesters.setValue("Choose Semester...");
-    }    
-    
+    }
+
     @FXML
     private void handleStudentBasicInfo(Event event) throws SQLException, ClassNotFoundException {
         Student dbStudent = new Student();
@@ -158,19 +158,19 @@ public class StudentController implements Initializable {
         textFiledStudentEmail.setText(returnedStudent.getStudentEmail());
         textFiledStudentId.setText(returnedStudent.getStudentId());
     }
-    
+
     @FXML
-    private void handelCurrentCourses(Event event) throws ClassNotFoundException, SQLException {        
+    private void handelCurrentCourses(Event event) throws ClassNotFoundException, SQLException {
         tableColumnCourseName.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         tableColumnCourseId.setCellValueFactory(new PropertyValueFactory<>("courseId"));
-        
+
         tableViewCourse.setItems(databaseFacade.getCurrentCourses());
 
     }
-    
+
     @FXML
     private void handleRegisteredCourses(Event event) throws ClassNotFoundException, SQLException {
-        
+
         tableColumnCourseNameReg.setCellValueFactory(new PropertyValueFactory<>("coursename"));
         tableColumnCourseStartTime.setCellValueFactory(new PropertyValueFactory<>("starttime"));
         tableColumnCourseEndTime.setCellValueFactory(new PropertyValueFactory<>("endtime"));
@@ -178,27 +178,28 @@ public class StudentController implements Initializable {
         tableColumnCourseLab.setCellValueFactory(new PropertyValueFactory<>("lab"));
         tableColumnCourseInstructorName.setCellValueFactory(new PropertyValueFactory<>("instructor"));
         tableColumnCourseDays.setCellValueFactory(new PropertyValueFactory<>("days"));
-                
+
         tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
     }
+
     @FXML
     private void handleUpdateCourses(Event event) throws ClassNotFoundException, SQLException {
         tableColumnDeleteCourseName.setCellValueFactory(new PropertyValueFactory<>("coursename"));
         tableColumnDeleteCourseSectionNumber.setCellValueFactory(new PropertyValueFactory<>("sectionnumber"));
         tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
     }
+
     @FXML
     private void clickedCourse(MouseEvent event) throws ClassNotFoundException, SQLException {
-        if (event.getClickCount()==2) {
-            if (tableViewCourse.getSelectionModel().getSelectedItem()!=null) { 
+        if (event.getClickCount() == 2) {
+            if (tableViewCourse.getSelectionModel().getSelectedItem() != null) {
                 tableViewCourse.setVisible(false);
                 tableViewSection.setVisible(true);
-                
+
                 course = tableViewCourse.getSelectionModel().getSelectedItem();
                 String clickedCourse = course.getCourseName();
-                
-                connection = DBConnection.getConnection();
-                
+
+
                 tableColumnSectionNo.setCellValueFactory(new PropertyValueFactory<>("sectionNumber"));
                 tableColumnSectionLab.setCellValueFactory(new PropertyValueFactory<>("sectionLab"));
                 tableColumnSectionInstructor.setCellValueFactory(new PropertyValueFactory<>("sectionInstructor"));
@@ -206,7 +207,7 @@ public class StudentController implements Initializable {
                 tableColumnSectionStartTime.setCellValueFactory(new PropertyValueFactory<>("startTime"));
                 tableColumnSectionEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
                 tableColumnDays.setCellValueFactory(new PropertyValueFactory<>("days"));
-                
+
                 tableViewSection.setItems(databaseFacade.getSections(clickedCourse));
             }
         }
@@ -214,21 +215,20 @@ public class StudentController implements Initializable {
 
     @FXML
     private void clickedSection(MouseEvent event) throws ClassNotFoundException, SQLException {
-        if (event.getClickCount()==2) {
-            if (tableViewSection.getSelectionModel().getSelectedItem()!=null) {
-                section = tableViewSection.getSelectionModel().getSelectedItem();        
-                connection = DBConnection.getConnection();
+        if (event.getClickCount() == 2) {
+            if (tableViewSection.getSelectionModel().getSelectedItem() != null) {
+                section = tableViewSection.getSelectionModel().getSelectedItem();
                 alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Confirmation Dialog");
                 alert.setHeaderText(null);
                 alert.setContentText("ADD THIS SECTION ?!");
                 ButtonType okButton = new ButtonType("Yes", ButtonData.YES);
                 ButtonType cancelButton = new ButtonType("No", ButtonData.CANCEL_CLOSE);
-                alert.getButtonTypes().setAll(okButton,cancelButton);
+                alert.getButtonTypes().setAll(okButton, cancelButton);
                 result = alert.showAndWait();
-                if (result.get()==okButton) {
+                if (result.get() == okButton) {
                     returnMap = databaseFacade.addSection(course.getCourseName(), section.getSectionNumber());
-                    if ((boolean)returnMap.get("isAdded")) {
+                    if ((boolean) returnMap.get("isAdded")) {
                         alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Success Message");
                         alert.setContentText("INSERTED COMPLETE");
@@ -237,7 +237,7 @@ public class StudentController implements Initializable {
                         tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
                         tableViewCourse.setVisible(true);
                         tableViewSection.setVisible(false);
-                    }else if((boolean)returnMap.get("isExist")){
+                    } else if ((boolean) returnMap.get("isExist")) {
                         alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Error Message");
                         alert.setContentText("Course Already Exist");
@@ -245,7 +245,7 @@ public class StudentController implements Initializable {
                         alert.showAndWait();
                         tableViewCourse.setVisible(true);
                         tableViewSection.setVisible(false);
-                    }else if((boolean)returnMap.get("conflictExist")){
+                    } else if ((boolean) returnMap.get("conflictExist")) {
                         alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Error Message");
                         alert.setContentText("Conflict With Other Course Exist");
@@ -254,35 +254,34 @@ public class StudentController implements Initializable {
                         tableViewCourse.setVisible(true);
                         tableViewSection.setVisible(false);
                     }
-                }else{
+                } else {
                     tableViewCourse.setVisible(true);
                     tableViewSection.setVisible(false);
                 }
             }
-             
+
         }
-    }   
+    }
 
     @FXML
     private void clickedDeleteSection(MouseEvent event) throws ClassNotFoundException, SQLException {
-        if (event.getClickCount()==2) {
-            if (tableViewRegisteredCourses.getSelectionModel().getSelectedItem()!=null) {
+        if (event.getClickCount() == 2) {
+            if (tableViewRegisteredCourses.getSelectionModel().getSelectedItem() != null) {
                 RegisteredCourses registeredCourses = tableViewRegisteredCourses.getSelectionModel().getSelectedItem();
                 System.out.println(registeredCourses.getCoursename());
                 String courseName = registeredCourses.getCoursename();
                 int sectionNumber = registeredCourses.getSectionnumber();
-                connection = DBConnection.getConnection();
                 alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Confirmation Dialog");
                 alert.setHeaderText(null);
                 alert.setContentText("DELETE THIS SECTION ?!");
                 ButtonType okButton = new ButtonType("Yes", ButtonData.YES);
                 ButtonType cancelButton = new ButtonType("No", ButtonData.CANCEL_CLOSE);
-                alert.getButtonTypes().setAll(okButton,cancelButton);
+                alert.getButtonTypes().setAll(okButton, cancelButton);
                 result = alert.showAndWait();
-                if (result.get()==okButton) {
+                if (result.get() == okButton) {
                     int deleted = databaseFacade.deleteSection(courseName, sectionNumber);
-                    if (deleted!=0) {
+                    if (deleted != 0) {
                         alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Success Message");
                         alert.setContentText("REMOVED COMPLETE");
@@ -297,20 +296,20 @@ public class StudentController implements Initializable {
 
     @FXML
     private void clickedUpdateSection(MouseEvent event) throws ClassNotFoundException, SQLException {
-        if (event.getClickCount()==2) {
-            if (tableViewUpdateCourse.getSelectionModel().getSelectedItem()!=null) {
+        if (event.getClickCount() == 2) {
+            if (tableViewUpdateCourse.getSelectionModel().getSelectedItem() != null) {
                 alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Confirmation Dialog");
                 alert.setHeaderText(null);
                 alert.setContentText("DO YOU WANT UPDATE THIS COURSE ?!");
                 ButtonType okButton = new ButtonType("Yes", ButtonData.YES);
                 ButtonType cancelButton = new ButtonType("No", ButtonData.CANCEL_CLOSE);
-                alert.getButtonTypes().setAll(okButton,cancelButton);
+                alert.getButtonTypes().setAll(okButton, cancelButton);
                 result = alert.showAndWait();
-                if (result.get()==okButton) {
+                if (result.get() == okButton) {
                     RegisteredCourses registeredCourses = tableViewUpdateCourse.getSelectionModel().getSelectedItem();
                     String rcName = registeredCourses.getCoursename();
-                    int preCourseSectionNumber  = registeredCourses.getSectionnumber();
+                    int preCourseSectionNumber = registeredCourses.getSectionnumber();
                     int[] sections = databaseFacade.getArrayofSections(rcName);
                     List<Integer> choices = new ArrayList<>();
                     for (int i = 0; i < sections.length; i++) {
@@ -323,15 +322,15 @@ public class StudentController implements Initializable {
                     Optional<Integer> result = dialog.showAndWait();
                     if (result.isPresent()) {
                         int choosedSections = result.get();
-                        returnMap = databaseFacade.updateSection(rcName, choosedSections,preCourseSectionNumber);
-                        if ((boolean)returnMap.get("conflict")) {
+                        returnMap = databaseFacade.updateSection(rcName, choosedSections, preCourseSectionNumber);
+                        if ((boolean) returnMap.get("conflict")) {
                             alert = new Alert(Alert.AlertType.ERROR);
                             alert.setTitle("Error Message");
                             alert.setContentText("Conflict With Other Course Exist");
                             alert.setHeaderText(null);
                             alert.showAndWait();
                             tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
-                        }else if((boolean)returnMap.get("updated")){
+                        } else if ((boolean) returnMap.get("updated")) {
                             alert = new Alert(Alert.AlertType.INFORMATION);
                             alert.setTitle("Success Message");
                             alert.setContentText("Updated Success");
@@ -339,30 +338,30 @@ public class StudentController implements Initializable {
                             alert.showAndWait();
                             tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
                         }
-                    }else{
+                    } else {
                         System.out.println("nothing");
                     }
                 }
-            }  
+            }
         }
     }
 
     @FXML
     private void handleComboBoxSemesters(ActionEvent event) throws SQLException, ClassNotFoundException {
-        int semesterNumber = 0 ;
+        int semesterNumber = 0;
         if (comboBoxSemesters.getValue().equalsIgnoreCase("First Semester of 2017/2018")) {
-            semesterNumber=1;
-        }else if(comboBoxSemesters.getValue().equalsIgnoreCase("Second Semester of 2017/2018")){
-            semesterNumber=2;
-        }else if(comboBoxSemesters.getValue().equalsIgnoreCase("First Semester of 2018/2019")){
-            semesterNumber=3;
-        }else{
-            semesterNumber=4;
+            semesterNumber = 1;
+        } else if (comboBoxSemesters.getValue().equalsIgnoreCase("Second Semester of 2017/2018")) {
+            semesterNumber = 2;
+        } else if (comboBoxSemesters.getValue().equalsIgnoreCase("First Semester of 2018/2019")) {
+            semesterNumber = 3;
+        } else {
+            semesterNumber = 4;
         }
-        
+
         tableColumnGradesCourseName.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         tableColumnGradesCourseGrade.setCellValueFactory(new PropertyValueFactory<>("grade"));
-        
+
         tableViewGrades.setItems(databaseFacade.grades(semesterNumber));
         vBoxTable.setVisible(true);
         tableViewGrades.setVisible(true);
@@ -380,16 +379,8 @@ public class StudentController implements Initializable {
         textFiledStudentLastName.setText("");
         textFiledStudentName.setText("");
         //labelStudentId.setText("");
-        Parent root = FXMLLoader.load(getClass().
-                                getResource("/Views/LoginView.fxml"));
-                        Scene scene = new Scene(root);
-                        Stage stage = Index.getStage();
-                        stage.setScene(scene);
-                        stage.show();
+        
+        viewFactory.getView("login");
     }
-
-    
-
-    
 
 }
