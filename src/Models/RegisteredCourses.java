@@ -5,7 +5,7 @@
  */
 package Models;
 
-import static Models.DBConnection.writeQuery;
+import static Models.MySQLConnection.writeQuery;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,23 +15,18 @@ import javafx.collections.ObservableList;
 
 /**
  *
- * @author WH1108
+ * @author mmghunaim
  */
 public class RegisteredCourses {
 
+    private int sectionnumber;
     private String studentid;
     private String coursename;
-    private int sectionnumber;
     private String starttime;
     private String endtime;
     private String instructor;
     private String lab;
     private String days;
-
-    String query;
-
-    PreparedStatement prestatement;
-    DBConnection connection;
 
     public RegisteredCourses(String studentid, String coursename, int sectionnumber, String starttime,
             String endtime, String instructor, String lab, String days) {
@@ -48,10 +43,6 @@ public class RegisteredCourses {
     public RegisteredCourses(String coursename, int sectionnumber) {
         this.coursename = coursename;
         this.sectionnumber = sectionnumber;
-    }
-
-    public RegisteredCourses(DBConnection connection) {
-        this.connection = connection;
     }
 
     public String getStudentid() {
@@ -84,45 +75,6 @@ public class RegisteredCourses {
 
     public String getDays() {
         return days;
-    }
-
-    public ObservableList<RegisteredCourses> getRegisteredCourses(String studentId) throws ClassNotFoundException, SQLException {
-        ObservableList registeredCoursesList
-                = FXCollections.observableArrayList();
-        query = "SELECT * FROM regcourses WHERE studentid=?";
-        writeQuery(connection.getLoggedStudent(), query);
-        prestatement = connection.getStatement("SELECT * FROM regcourses WHERE studentid=?");
-        if (studentId == null) {
-            prestatement.setString(1, connection.getLoggedStudent());
-        } else {
-            prestatement.setString(1, studentId);
-        }
-        prestatement.setString(1, connection.getLoggedStudent());
-        connection.setResultSet(prestatement.executeQuery());
-
-        while (connection.getResultSet().next()) {
-            if (studentId == null) {
-                RegisteredCourses registeredCourses
-                        = new RegisteredCourses(
-                                connection.getResultSet().getString("studentid"),
-                                connection.getResultSet().getString("coursename"),
-                                connection.getResultSet().getInt("sectionnumber"),
-                                connection.getResultSet().getString("starttime"),
-                                connection.getResultSet().getString("endtime"),
-                                connection.getResultSet().getString("instructor"),
-                                connection.getResultSet().getString("lab"),
-                                connection.getResultSet().getString("days")
-                        );
-                registeredCoursesList.add(registeredCourses);
-            } else {
-                RegisteredCourses registeredCourses
-                        = new RegisteredCourses(
-                                connection.getResultSet().getString("coursename"),
-                                connection.getResultSet().getInt("sectionnumber"));
-                registeredCoursesList.add(registeredCourses);
-            }
-        }
-        return registeredCoursesList;
     }
 
 }

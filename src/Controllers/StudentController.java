@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Controllers;
 
 import Models.Course;
@@ -44,28 +39,19 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
-import Models.DBConnection;
+import Models.MySQLConnection;
 import Index.Index;
-import Models.DatabaseFacade;
+import Models.MongoFacade;
+import Models.MySQLFacade;
 import Views.ViewFactory;
 
 /**
  * FXML Controller class
  *
- * @author WH1108
+ * @author mmgunaim
  */
 public class StudentController implements Initializable {
 
-    Course course;
-    Section section;
-    String userName;
-    DBConnection connection;
-    Optional<ButtonType> result;
-    private Alert alert;
-    Map returnMap;
-
-    ObservableList<String> semesterList = FXCollections.observableArrayList("First Semester of 2017/2018", "Second Semester of 2017/2018",
-            "First Semester of 2018/2019", "Second Semester of 2018/2019");
     @FXML
     private Tab tabPaneCurrentCourses;
     private TextArea textAreaCurrent;
@@ -138,20 +124,52 @@ public class StudentController implements Initializable {
     @FXML
     private Tab tabStudentInfo;
 
-    DatabaseFacade databaseFacade;
+    Course course;
+    Section section;
+    String userName;
+    MySQLConnection connection;
+    Optional<ButtonType> result;
+    private Alert alert;
+    Map returnMap;
+
+    ObservableList<String> semesterList = FXCollections.observableArrayList("First Semester of 2017/2018", "Second Semester of 2017/2018",
+            "First Semester of 2018/2019", "Second Semester of 2018/2019");
+
+    private String connectionType = "mysql";
+
+    MySQLFacade mysqlFacade;
+    MongoFacade mongoFacade;
+
     ViewFactory viewFactory;
+
+    public StudentController() {
+        if (connectionType.equalsIgnoreCase("mysql")) {
+                mysqlFacade = MySQLFacade.getDatabaseFacade();
+            } else {
+                mongoFacade = MongoFacade.getMongoFacade();
+            }
+    }
+    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        databaseFacade = DatabaseFacade.getDatabaseFacade();
-        viewFactory = ViewFactory.getViewFactory();
-        comboBoxSemesters.setItems(semesterList);
-        comboBoxSemesters.setValue("Choose Semester...");
+        System.out.println("initialize");
+        try {
+            viewFactory = ViewFactory.getViewFactory();
+            comboBoxSemesters.setItems(semesterList);
+            comboBoxSemesters.setValue("Choose Semester...");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @FXML
     private void handleStudentBasicInfo(Event event) throws SQLException, ClassNotFoundException {
-        Student dbStudent = new Student();
-        Student returnedStudent = dbStudent.showStudentBasicInfo();
+        System.out.println("What the hell?!");
+        System.out.println("What return " + mysqlFacade);
+        Student returnedStudent = mysqlFacade.showStudentBasicInfo();
+        System.out.println(returnedStudent);
+        System.out.println(returnedStudent.getStudentEmail());
         textFiledStudentName.setText(returnedStudent.getStudentName());
         textFiledStudentAddress.setText(returnedStudent.getStudentAddress());
         textFiledStudentLastName.setText(returnedStudent.getStudentLastName());
@@ -164,7 +182,7 @@ public class StudentController implements Initializable {
         tableColumnCourseName.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         tableColumnCourseId.setCellValueFactory(new PropertyValueFactory<>("courseId"));
 
-        tableViewCourse.setItems(databaseFacade.getCurrentCourses());
+        tableViewCourse.setItems(mysqlFacade.getCurrentCourses());
 
     }
 
@@ -179,14 +197,14 @@ public class StudentController implements Initializable {
         tableColumnCourseInstructorName.setCellValueFactory(new PropertyValueFactory<>("instructor"));
         tableColumnCourseDays.setCellValueFactory(new PropertyValueFactory<>("days"));
 
-        tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
+        tableViewRegisteredCourses.setItems(mysqlFacade.getRegisteredCourses(""));
     }
 
     @FXML
     private void handleUpdateCourses(Event event) throws ClassNotFoundException, SQLException {
         tableColumnDeleteCourseName.setCellValueFactory(new PropertyValueFactory<>("coursename"));
         tableColumnDeleteCourseSectionNumber.setCellValueFactory(new PropertyValueFactory<>("sectionnumber"));
-        tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
+        tableViewUpdateCourse.setItems(mysqlFacade.getRegisteredCourses(""));
     }
 
     @FXML
@@ -199,7 +217,6 @@ public class StudentController implements Initializable {
                 course = tableViewCourse.getSelectionModel().getSelectedItem();
                 String clickedCourse = course.getCourseName();
 
-
                 tableColumnSectionNo.setCellValueFactory(new PropertyValueFactory<>("sectionNumber"));
                 tableColumnSectionLab.setCellValueFactory(new PropertyValueFactory<>("sectionLab"));
                 tableColumnSectionInstructor.setCellValueFactory(new PropertyValueFactory<>("sectionInstructor"));
@@ -208,7 +225,7 @@ public class StudentController implements Initializable {
                 tableColumnSectionEndTime.setCellValueFactory(new PropertyValueFactory<>("endTime"));
                 tableColumnDays.setCellValueFactory(new PropertyValueFactory<>("days"));
 
-                tableViewSection.setItems(databaseFacade.getSections(clickedCourse));
+                tableViewSection.setItems(mysqlFacade.getSections(clickedCourse));
             }
         }
     }
@@ -227,14 +244,14 @@ public class StudentController implements Initializable {
                 alert.getButtonTypes().setAll(okButton, cancelButton);
                 result = alert.showAndWait();
                 if (result.get() == okButton) {
-                    returnMap = databaseFacade.addSection(course.getCourseName(), section.getSectionNumber());
+                    returnMap = mysqlFacade.addSection(course.getCourseName(), section.getSectionNumber());
                     if ((boolean) returnMap.get("isAdded")) {
                         alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Success Message");
                         alert.setContentText("INSERTED COMPLETE");
                         alert.setHeaderText(null);
                         alert.showAndWait();
-                        tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
+                        tableViewRegisteredCourses.setItems(mysqlFacade.getRegisteredCourses(""));
                         tableViewCourse.setVisible(true);
                         tableViewSection.setVisible(false);
                     } else if ((boolean) returnMap.get("isExist")) {
@@ -280,14 +297,14 @@ public class StudentController implements Initializable {
                 alert.getButtonTypes().setAll(okButton, cancelButton);
                 result = alert.showAndWait();
                 if (result.get() == okButton) {
-                    int deleted = databaseFacade.deleteSection(courseName, sectionNumber);
+                    int deleted = mysqlFacade.deleteSection(courseName, sectionNumber);
                     if (deleted != 0) {
                         alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Success Message");
                         alert.setContentText("REMOVED COMPLETE");
                         alert.setHeaderText(null);
                         alert.showAndWait();
-                        tableViewRegisteredCourses.setItems(databaseFacade.getRegisteredCourses(""));
+                        tableViewRegisteredCourses.setItems(mysqlFacade.getRegisteredCourses(""));
                     }
                 }
             }
@@ -310,7 +327,7 @@ public class StudentController implements Initializable {
                     RegisteredCourses registeredCourses = tableViewUpdateCourse.getSelectionModel().getSelectedItem();
                     String rcName = registeredCourses.getCoursename();
                     int preCourseSectionNumber = registeredCourses.getSectionnumber();
-                    int[] sections = databaseFacade.getArrayofSections(rcName);
+                    int[] sections = mysqlFacade.getArrayofSections(rcName);
                     List<Integer> choices = new ArrayList<>();
                     for (int i = 0; i < sections.length; i++) {
                         choices.add(sections[i]);
@@ -322,21 +339,21 @@ public class StudentController implements Initializable {
                     Optional<Integer> result = dialog.showAndWait();
                     if (result.isPresent()) {
                         int choosedSections = result.get();
-                        returnMap = databaseFacade.updateSection(rcName, choosedSections, preCourseSectionNumber);
+                        returnMap = mysqlFacade.updateSection(rcName, choosedSections, preCourseSectionNumber);
                         if ((boolean) returnMap.get("conflict")) {
                             alert = new Alert(Alert.AlertType.ERROR);
                             alert.setTitle("Error Message");
                             alert.setContentText("Conflict With Other Course Exist");
                             alert.setHeaderText(null);
                             alert.showAndWait();
-                            tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
+                            tableViewUpdateCourse.setItems(mysqlFacade.getRegisteredCourses(""));
                         } else if ((boolean) returnMap.get("updated")) {
                             alert = new Alert(Alert.AlertType.INFORMATION);
                             alert.setTitle("Success Message");
                             alert.setContentText("Updated Success");
                             alert.setHeaderText(null);
                             alert.showAndWait();
-                            tableViewUpdateCourse.setItems(databaseFacade.getRegisteredCourses(""));
+                            tableViewUpdateCourse.setItems(mysqlFacade.getRegisteredCourses(""));
                         }
                     } else {
                         System.out.println("nothing");
@@ -362,7 +379,7 @@ public class StudentController implements Initializable {
         tableColumnGradesCourseName.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         tableColumnGradesCourseGrade.setCellValueFactory(new PropertyValueFactory<>("grade"));
 
-        tableViewGrades.setItems(databaseFacade.grades(semesterNumber));
+        tableViewGrades.setItems(mysqlFacade.grades(semesterNumber));
         vBoxTable.setVisible(true);
         tableViewGrades.setVisible(true);
     }
@@ -379,7 +396,7 @@ public class StudentController implements Initializable {
         textFiledStudentLastName.setText("");
         textFiledStudentName.setText("");
         //labelStudentId.setText("");
-        
+
         viewFactory.getView("login");
     }
 

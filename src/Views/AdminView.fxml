@@ -16,234 +16,236 @@
 <?import javafx.scene.text.Font?>
 
 <AnchorPane id="AnchorPane" prefHeight="455.0" prefWidth="766.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.AdminController">
-   <children>
-      <TabPane prefHeight="455.0" prefWidth="766.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-            <Tab text="Basic Info">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox layoutX="149.0" layoutY="110.0" prefHeight="112.0" prefWidth="227.0">
-                           <children>
-                              <Label prefHeight="41.0" prefWidth="169.0" text="Admin Name :" textAlignment="CENTER">
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                                 <font>
-                                    <Font size="15.0" />
-                                 </font>
-                              </Label>
-                              <Label text="Admin Password :">
-                                 <font>
-                                    <Font size="15.0" />
-                                 </font>
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </Label>
-                           </children>
-                        </VBox>
-                        <VBox layoutX="401.0" layoutY="111.0" prefHeight="110.0" prefWidth="236.0">
-                           <children>
-                              <Label text="admin">
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                                 <font>
-                                    <Font size="15.0" />
-                                 </font>
-                              </Label>
-                              <Label text="********">
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                                 <font>
-                                    <Font size="15.0" />
-                                 </font>
-                              </Label>
-                           </children>
-                        </VBox>
-                        <VBox layoutX="260.0" layoutY="257.0" prefHeight="66.0" prefWidth="159.0">
-                           <children>
-                              <Button fx:id="buttonadminlogout" mnemonicParsing="false" onAction="#handleButtonAdminLogout" prefHeight="46.0" prefWidth="135.0" text="Logout" />
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-          <Tab fx:id="tabPaneStudent" onSelectionChanged="#handleTabPaneStudent" text="Students">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TableView fx:id="tableViewStudent" onMouseClicked="#handleTableColumnUpdate" prefHeight="428.0" prefWidth="766.0">
-                          <columns>
-                            <TableColumn fx:id="tableColumnStudentId" prefWidth="142.0" text="Student ID" />
-                            <TableColumn fx:id="tableColumnStudentName" prefWidth="196.0" text="Student Name" />
-                              <TableColumn fx:id="tableColumnStudentPhone" prefWidth="129.0" text="Student Phone" />
-                              <TableColumn fx:id="tableColumnStudentAddress" prefWidth="131.0" text="Student Address" />
-                          </columns>
-                        </TableView>
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-            <Tab text="Add Student">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <FlowPane prefHeight="426.0" prefWidth="766.0">
-                           <children>
-                              <VBox prefHeight="285.0" prefWidth="402.0">
-                                 <children>
-                                    <Label contentDisplay="CENTER" text="Student ID :" textAlignment="CENTER">
-                                       <VBox.margin>
-                                          <Insets bottom="30.0" left="10.0" top="10.0" />
-                                       </VBox.margin>
-                                       <font>
-                                          <Font size="16.0" />
-                                       </font>
-                                    </Label>
-                                    <Label contentDisplay="CENTER" text="Student Name :" textAlignment="CENTER">
-                                       <VBox.margin>
-                                          <Insets bottom="30.0" left="10.0" />
-                                       </VBox.margin>
-                                       <font>
-                                          <Font size="16.0" />
-                                       </font>
-                                    </Label>
-                                    <Label contentDisplay="CENTER" text="Student Password :" textAlignment="CENTER">
-                                       <VBox.margin>
-                                          <Insets bottom="30.0" left="10.0" />
-                                       </VBox.margin>
-                                       <font>
-                                          <Font size="16.0" />
-                                       </font>
-                                    </Label>
-                                    <Label contentDisplay="CENTER" text="Student Phone : " textAlignment="CENTER">
-                                       <VBox.margin>
-                                          <Insets bottom="30.0" left="10.0" />
-                                       </VBox.margin>
-                                       <font>
-                                          <Font size="16.0" />
-                                       </font>
-                                    </Label>
-                                    <Label contentDisplay="CENTER" text="Student Address" textAlignment="CENTER">
-                                       <VBox.margin>
-                                          <Insets bottom="30.0" left="10.0" />
-                                       </VBox.margin>
-                                       <font>
-                                          <Font size="16.0" />
-                                       </font>
-                                    </Label>
-                                 </children>
-                              </VBox>
-                              <VBox prefHeight="285.0" prefWidth="358.0">
-                                 <children>
-                                    <TextField fx:id="textFiledStudentId">
-                                       <VBox.margin>
-                                          <Insets bottom="30.0" top="10.0" />
-                                       </VBox.margin>
-                                    </TextField>
-                                    <TextField fx:id="textFiledStudentName">
-                                       <VBox.margin>
-                                          <Insets bottom="30.0" />
-                                       </VBox.margin>
-                                    </TextField>
-                                    <PasswordField fx:id="textFiledStudentPassword">
-                                       <VBox.margin>
-                                          <Insets bottom="32.0" />
-                                       </VBox.margin>
-                                    </PasswordField>
-                                    <TextField fx:id="textFiledStudentPhone">
-                                       <VBox.margin>
-                                          <Insets bottom="32.0" />
-                                       </VBox.margin>
-                                    </TextField>
-                                    <TextField fx:id="textFiledStudentAddress">
-                                       <VBox.margin>
-                                          <Insets bottom="25.0" />
-                                       </VBox.margin>
-                                    </TextField>
-                                 </children>
-                              </VBox>
-                              <VBox prefHeight="96.0" prefWidth="765.0">
-                                 <children>
-                                    <Button fx:id="buttonAddNewStudent" mnemonicParsing="false" onAction="#handleButtonAddNewStudent" prefHeight="30.0" prefWidth="222.0" text="Add New Student">
-                                       <VBox.margin>
-                                          <Insets bottom="15.0" left="220.0" />
-                                       </VBox.margin>
-                                    </Button>
-                                    <Button fx:id="buttonCancel" mnemonicParsing="false" onAction="#handleButtonCancel" prefHeight="30.0" prefWidth="223.0" text="Cancel">
-                                       <VBox.margin>
-                                          <Insets bottom="15.0" left="220.0" />
-                                       </VBox.margin>
-                                    </Button>
-                                 </children>
-                              </VBox>
-                           </children>
-                        </FlowPane>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-          <Tab fx:id="tabPaneDeleteStudent" onSelectionChanged="#handleTabPaneDeleteStudent" text="Delete Student">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TableView fx:id="tableViewDeleteStudent" onMouseClicked="#handleTableColumn" prefHeight="426.0" prefWidth="766.0">
-                          <columns>
-                            <TableColumn fx:id="tableColumnDeleteStudentName" prefWidth="291.0" text="Student Name" />
-                            <TableColumn fx:id="tableColumnDeleteStudentId" prefWidth="203.0" text="Student ID" />
-                          </columns>
-                        </TableView>
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-          <Tab text="Student Registered Courses">
-              <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                      <children>
-                          <FlowPane columnHalignment="CENTER" prefHeight="426.0" prefWidth="772.0">
-                              <children>
-                                  <Label prefHeight="26.0" prefWidth="165.0" text="Choose Student :" textAlignment="CENTER">
-                                      <FlowPane.margin>
-                                          <Insets left="140.0" top="150.0" />
-                                      </FlowPane.margin>
-                                      <font>
-                                          <Font size="17.0" />
-                                      </font>
-                                  </Label>
-                              <ComboBox fx:id="comboBoxStudentsCourses" onAction="#handleComboBoxStudentsCourses" prefHeight="30.0" prefWidth="166.0">
-                                 <FlowPane.margin>
-                                    <Insets top="150.0" />
-                                 </FlowPane.margin>
-                              </ComboBox>
+    <children>
+        <TabPane prefHeight="455.0" prefWidth="766.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Basic Info">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox layoutX="149.0" layoutY="110.0" prefHeight="112.0" prefWidth="227.0">
+                                    <children>
+                                        <Label prefHeight="41.0" prefWidth="169.0" text="Admin Name :" textAlignment="CENTER">
+                                            <padding>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                            </padding>
+                                            <font>
+                                                <Font size="15.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="Admin Password :">
+                                            <font>
+                                                <Font size="15.0" />
+                                            </font>
+                                            <VBox.margin>
+                                                <Insets top="10.0" />
+                                            </VBox.margin>
+                                            <padding>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                            </padding>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                                <VBox layoutX="401.0" layoutY="111.0" prefHeight="110.0" prefWidth="236.0">
+                                    <children>
+                                        <Label text="admin">
+                                            <padding>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                            </padding>
+                                            <font>
+                                                <Font size="15.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="********">
+                                            <VBox.margin>
+                                                <Insets top="10.0" />
+                                            </VBox.margin>
+                                            <padding>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                            </padding>
+                                            <font>
+                                                <Font size="15.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                                <VBox layoutX="260.0" layoutY="257.0" prefHeight="66.0" prefWidth="159.0">
+                                    <children>
+                                        <Button fx:id="buttonadminlogout" mnemonicParsing="false" onAction="#handleButtonAdminLogout" prefHeight="46.0" prefWidth="135.0" text="Logout" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="tabPaneStudent" onSelectionChanged="#handleTabPaneStudent" text="Students">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <TableView fx:id="tableViewStudent" onMouseClicked="#handleTableColumnUpdate" prefHeight="428.0" prefWidth="766.0">
+                                    <columns>
+                                        <TableColumn fx:id="tableColumnStudentId" prefWidth="142.0" text="Student ID" />
+                                        <TableColumn fx:id="tableColumnStudentName" prefWidth="196.0" text="Student Name" />
+                                        <TableColumn fx:id="tableColumnStudentPhone" prefWidth="129.0" text="Student Phone" />
+                                        <TableColumn fx:id="tableColumnStudentAddress" prefWidth="131.0" text="Student Address" />
+                                    </columns>
+                                </TableView>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="Add Student">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <FlowPane prefHeight="426.0" prefWidth="766.0">
+                                    <children>
+                                        <VBox prefHeight="285.0" prefWidth="402.0">
+                                            <children>
+                                                <Label contentDisplay="CENTER" text="Student ID :" textAlignment="CENTER">
+                                                    <VBox.margin>
+                                                        <Insets bottom="30.0" left="10.0" top="10.0" />
+                                                    </VBox.margin>
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label contentDisplay="CENTER" text="Student Name :" textAlignment="CENTER">
+                                                    <VBox.margin>
+                                                        <Insets bottom="30.0" left="10.0" />
+                                                    </VBox.margin>
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label contentDisplay="CENTER" text="Student Password :" textAlignment="CENTER">
+                                                    <VBox.margin>
+                                                        <Insets bottom="30.0" left="10.0" />
+                                                    </VBox.margin>
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label contentDisplay="CENTER" text="Student Phone : " textAlignment="CENTER">
+                                                    <VBox.margin>
+                                                        <Insets bottom="30.0" left="10.0" />
+                                                    </VBox.margin>
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label contentDisplay="CENTER" text="Student Address" textAlignment="CENTER">
+                                                    <VBox.margin>
+                                                        <Insets bottom="30.0" left="10.0" />
+                                                    </VBox.margin>
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+                                        <VBox prefHeight="285.0" prefWidth="358.0">
+                                            <children>
+                                                <TextField fx:id="textFiledStudentId">
+                                                    <VBox.margin>
+                                                        <Insets bottom="30.0" top="10.0" />
+                                                    </VBox.margin>
+                                                </TextField>
+                                                <TextField fx:id="textFiledStudentName">
+                                                    <VBox.margin>
+                                                        <Insets bottom="30.0" />
+                                                    </VBox.margin>
+                                                </TextField>
+                                                <PasswordField fx:id="textFiledStudentPassword">
+                                                    <VBox.margin>
+                                                        <Insets bottom="32.0" />
+                                                    </VBox.margin>
+                                                </PasswordField>
+                                                <TextField fx:id="textFiledStudentPhone">
+                                                    <VBox.margin>
+                                                        <Insets bottom="32.0" />
+                                                    </VBox.margin>
+                                                </TextField>
+                                                <TextField fx:id="textFiledStudentAddress">
+                                                    <VBox.margin>
+                                                        <Insets bottom="25.0" />
+                                                    </VBox.margin>
+                                                </TextField>
+                                            </children>
+                                        </VBox>
+                                        <VBox prefHeight="96.0" prefWidth="765.0">
+                                            <children>
+                                                <Button fx:id="buttonAddNewStudent" mnemonicParsing="false" onAction="#handleButtonAddNewStudent" prefHeight="30.0" prefWidth="222.0" text="Add New Student">
+                                                    <VBox.margin>
+                                                        <Insets bottom="15.0" left="220.0" />
+                                                    </VBox.margin>
+                                                </Button>
+                                                <Button fx:id="buttonCancel" mnemonicParsing="false" onAction="#handleButtonCancel" prefHeight="30.0" prefWidth="223.0" text="Cancel">
+                                                    <VBox.margin>
+                                                        <Insets bottom="15.0" left="220.0" />
+                                                    </VBox.margin>
+                                                </Button>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </FlowPane>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="tabPaneDeleteStudent" onSelectionChanged="#handleTabPaneDeleteStudent" text="Delete Student">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <TableView fx:id="tableViewDeleteStudent" onMouseClicked="#handleTableColumn" prefHeight="426.0" prefWidth="766.0">
+                                    <columns>
+                                        <TableColumn fx:id="tableColumnDeleteStudentName" prefWidth="291.0" text="Student Name" />
+                                        <TableColumn fx:id="tableColumnDeleteStudentId" prefWidth="203.0" text="Student ID" />
+                                    </columns>
+                                </TableView>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="Student Registered Courses">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <FlowPane columnHalignment="CENTER" prefHeight="426.0" prefWidth="772.0">
+                                    <children>
+                                        <Label prefHeight="26.0" prefWidth="165.0" text="Choose Student :" textAlignment="CENTER">
+                                            <FlowPane.margin>
+                                                <Insets left="140.0" top="150.0" />
+                                            </FlowPane.margin>
+                                            <font>
+                                                <Font size="17.0" />
+                                            </font>
+                                        </Label>
+                                        <ComboBox fx:id="comboBoxStudentsCourses" onAction="#handleComboBoxStudentsCourses" prefHeight="30.0" prefWidth="166.0">
+                                            <FlowPane.margin>
+                                                <Insets top="150.0" />
+                                            </FlowPane.margin>
+                                        </ComboBox>
                                   
-                              </children>
-                          </FlowPane>
-                          <VBox fx:id="vBoxTable" prefHeight="426.0" prefWidth="772.0" visible="false">
-                              <children>
-                                  <Button fx:id="goBack" mnemonicParsing="false" onAction="#handleButtonGoBack" text="&lt;&lt; Go Back " />
-                                  <TableView fx:id="tableViewStudensCourses" prefHeight="426.0" prefWidth="772.0" visible="true">
-                                      <columns>
-                                          <TableColumn fx:id="tableColumnStudensCoursesCourseName" prefWidth="406.0" text="Course Name" />
-                                          <TableColumn fx:id="tableColumnStudensCoursesCourseSection" prefWidth="217.0" text="Course Section" />
-                                      </columns>
-                                  </TableView>
-                              </children>
-                          </VBox>
+                                    </children>
+                                </FlowPane>
+                                <VBox fx:id="vBoxTable" prefHeight="426.0" prefWidth="772.0" visible="false">
+                                    <children>
+                                        <Button fx:id="goBack" mnemonicParsing="false" onAction="#handleButtonGoBack" text="&lt;&lt; Go Back " />
+                                        <TableView fx:id="tableViewStudensCourses" prefHeight="426.0" prefWidth="772.0" visible="true">
+                                            <columns>
+                                                <TableColumn fx:id="tableColumnStudensCoursesCourseName" prefWidth="406.0" text="Course Name" />
+                                                <TableColumn fx:id="tableColumnStudensCoursesCourseSection" prefWidth="217.0" text="Course Section" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
                   
-                      </children>
-                  </AnchorPane>
-              </content>
-          </Tab>
-        </tabs>
-      </TabPane>
-   </children>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
 </AnchorPane>

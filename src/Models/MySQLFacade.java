@@ -6,99 +6,96 @@
 package Models;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Map;
 import javafx.collections.ObservableList;
 
 /**
  *
- * @author hp
+ * @author mmghunaim
  */
-public class DatabaseFacade {
+public class MySQLFacade {
 
-    private Student dbStudent;
-    private Course dbCourse;
-    private RegisteredCourses dbRegisteredCourses;
-    private Section dbSection;
+    private MySQLAdmin admin;
+    private MySQLStudent student;
 
-    private static DatabaseFacade databaseFacade;
-    private DBConnection dbConnection = DBConnection.getDbConnection();
+    private static MySQLFacade databaseFacade;
+    private MySQLConnection dbConnection = MySQLConnection.getDbConnection();
 
-    private DatabaseFacade() {
+    private MySQLFacade() {
         ConnectionState openConnection = new OpenConnection();
         dbConnection.setConnection(openConnection.getStateOfConnection(dbConnection));
-        this.dbStudent = new Student();
-        this.dbSection = new Section();
-        this.dbCourse = new Course();
-        this.dbRegisteredCourses = new RegisteredCourses(dbConnection);
+        
+        this.admin = new MySQLAdmin();
+        this.student = new MySQLStudent();
     }
 
-    public static DatabaseFacade getDatabaseFacade() {
+    public static MySQLFacade getDatabaseFacade() {
         if (databaseFacade == null) {
-            databaseFacade = new DatabaseFacade();
+            databaseFacade = new MySQLFacade();
         }
         return databaseFacade;
     }
 
     public void closeConnection() {
-        System.out.println("NOW WE WILL CLOSE ALL THIS");
         ConnectionState closeConnection = new CloseConnection();
         dbConnection.setConnection(closeConnection.getStateOfConnection(dbConnection));
 
     }
 
     public ObservableList<Student> getStudent() throws ClassNotFoundException, SQLException {
-        return dbStudent.getStudent();
+        return admin.getStudent();
     }
 
     public Map addStudent(String id, String name, String password, String phone, String address) throws ClassNotFoundException, SQLException {
-        return dbStudent.addStudent(id, name, password, phone, address);
+        return admin.addStudent(id, name, password, phone, address);
     }
 
-    public String[] getStudentIds() throws SQLException, ClassNotFoundException {
-        return dbStudent.getStudentIds();
+    public ArrayList getStudentIds() throws SQLException, ClassNotFoundException {
+        return admin.getStudentIds();
     }
 
     public boolean deleteStudent(String studentName) throws SQLException, ClassNotFoundException {
-        return dbStudent.deleteStudent(studentName);
+        return admin.deleteStudent(studentName);
     }
 
     public Map updateStudent(String stdid, String text, String updateType) throws SQLException, ClassNotFoundException {
-        return dbStudent.updateStudent(stdid, text, updateType);
+        return admin.updateStudent(stdid, text, updateType);
     }
 
     public Student showStudentBasicInfo() throws SQLException, ClassNotFoundException {
-        return dbStudent.showStudentBasicInfo();
+        return admin.showStudentBasicInfo();
     }
 
     public ObservableList<Course> getCurrentCourses() throws ClassNotFoundException, SQLException {
-        return dbCourse.getCurrentCourses();
+        return student.getCurrentCourses();
     }
 
     public ObservableList<Course> grades(int semesterNumber) throws SQLException, ClassNotFoundException {
-        return dbCourse.grades(semesterNumber);
+        return student.grades(semesterNumber);
     }
 
     public ObservableList<Section> getSections(String courseName) throws ClassNotFoundException, SQLException {
-        return dbSection.getSections(courseName);
+        return student.getSections(courseName);
     }
 
     public int deleteSection(String sectionName, int sectionNumber) throws ClassNotFoundException, SQLException {
-        return dbSection.deleteSection(sectionName, sectionNumber);
+        return student.deleteSection(sectionName, sectionNumber);
     }
 
     public Map updateSection(String sectionName, int sectionNumber, int preSectionNumber) throws ClassNotFoundException, SQLException {
-        return dbSection.updateSection(sectionName, sectionNumber, preSectionNumber);
+        return student.updateSection(sectionName, sectionNumber, preSectionNumber);
     }
 
     public Map addSection(String sectionName, int sectionNumber) throws ClassNotFoundException, SQLException {
-        return dbSection.addSection(sectionName, sectionNumber);
+        return student.addSection(sectionName, sectionNumber);
     }
 
     public int[] getArrayofSections(String courseName) throws SQLException, ClassNotFoundException {
-        return dbSection.getArrayofSections(courseName);
+        return student.getArrayofSections(courseName);
     }
 
     public ObservableList<RegisteredCourses> getRegisteredCourses(String studentId) throws ClassNotFoundException, SQLException {
-        return dbRegisteredCourses.getRegisteredCourses(studentId);
+        return student.getRegisteredCourses(studentId);
     }
 }

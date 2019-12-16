@@ -33,18 +33,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import Models.DBConnection;
+import Models.MySQLConnection;
 import Index.Index;
-import Models.DatabaseFacade;
+import Models.MySQLFacade;
+import Models.MongoFacade;
+import Models.MongoAdmin;
 import Views.ViewFactory;
+import java.util.ArrayList;
 
 public class AdminController implements Initializable {
 
-    Alert alert;
-    Map returnMap;
-    ObservableList<String> studentList = FXCollections.observableArrayList();
-    String[] studenIds;
-    Optional<ButtonType> result;
     @FXML
     private TextField textFiledStudentId;
     @FXML
@@ -94,21 +92,48 @@ public class AdminController implements Initializable {
     @FXML
     private Button buttonadminlogout;
 
-    DatabaseFacade databaseFacade;
+    Alert alert;
+    Map returnMap;
+    ObservableList<String> studentList = FXCollections.observableArrayList();
+    ArrayList<String> studenIds;
+    Optional<ButtonType> result;
+
+    private String connectionType = "mongo";
+
+    MySQLFacade mysqlFacade;
+    MongoFacade mongoFacade;
+
     ViewFactory viewFactory;
+
+    public AdminController() {
+        if (connectionType.equalsIgnoreCase("mysql")) {
+                mysqlFacade = MySQLFacade.getDatabaseFacade();
+            } else {
+                mongoFacade = MongoFacade.getMongoFacade();
+            }
+    }
+    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        System.out.println("initialize");
         try {
-            databaseFacade = DatabaseFacade.getDatabaseFacade();
+            
+
             viewFactory = ViewFactory.getViewFactory();
-            studenIds = databaseFacade.getStudentIds();
-            for (int i = 0; i < studenIds.length; i++) {
-                studentList.add(studenIds[i]);
+            if (connectionType.equalsIgnoreCase("mysql")) {
+                studenIds = mysqlFacade.getStudentIds();
+            } else {
+                studenIds = mongoFacade.getStudentIds();
+            }
+
+            for (int i = 0; i < studenIds.size(); i++) {
+                studentList.add(studenIds.get(i));
             }
             comboBoxStudentsCourses.setItems(studentList);
             comboBoxStudentsCourses.setValue("Choose Student ID ...");
         } catch (Exception ex) {
-            System.out.println("Exception");
+            ex.printStackTrace();
         }
 
     }
@@ -120,7 +145,11 @@ public class AdminController implements Initializable {
         tableColumnStudentPhone.setCellValueFactory(new PropertyValueFactory<>("studentPhone"));
         tableColumnStudentAddress.setCellValueFactory(new PropertyValueFactory<>("studentAddress"));
 
-        tableViewStudent.setItems(databaseFacade.getStudent());
+        if (connectionType.equalsIgnoreCase("mysql")) {
+            tableViewStudent.setItems(mysqlFacade.getStudent());
+        } else {
+            tableViewStudent.setItems(mongoFacade.getStudent());
+        }
     }
 
     @FXML
@@ -128,14 +157,22 @@ public class AdminController implements Initializable {
         tableColumnDeleteStudentName.setCellValueFactory(new PropertyValueFactory<>("studentId"));
         tableColumnDeleteStudentId.setCellValueFactory(new PropertyValueFactory<>("studentName"));
 
-        tableViewDeleteStudent.setItems(databaseFacade.getStudent());
+        if (connectionType.equalsIgnoreCase("mysql")) {
+            tableViewDeleteStudent.setItems(mysqlFacade.getStudent());
+        } else {
+            tableViewDeleteStudent.setItems(mongoFacade.getStudent());
+        }
     }
 
     @FXML
     private void handleButtonAddNewStudent(ActionEvent event) throws ClassNotFoundException, SQLException {
-        System.out.println(textFiledStudentId.getText());
-        returnMap = databaseFacade.addStudent(textFiledStudentId.getText(), textFiledStudentName.getText(),
-                textFiledStudentPassword.getText(), textFiledStudentPhone.getText(), textFiledStudentAddress.getText());
+        if (connectionType.equalsIgnoreCase("mysql")) {
+            returnMap = mysqlFacade.addStudent(textFiledStudentId.getText(), textFiledStudentName.getText(),
+                    textFiledStudentPassword.getText(), textFiledStudentPhone.getText(), textFiledStudentAddress.getText());
+        } else {
+            returnMap = mongoFacade.addStudent(textFiledStudentId.getText(), textFiledStudentName.getText(),
+                    textFiledStudentPassword.getText(), textFiledStudentPhone.getText(), textFiledStudentAddress.getText());
+        }
         if ((boolean) returnMap.get("isAdded")) {
             textFiledStudentId.setText("");
             textFiledStudentName.setText("");
@@ -143,10 +180,10 @@ public class AdminController implements Initializable {
             textFiledStudentPhone.setText("");
             textFiledStudentAddress.setText("");
 
-            studenIds = databaseFacade.getStudentIds();
+            studenIds = mongoFacade.getStudentIds();
             studentList = FXCollections.observableArrayList();
-            for (int i = 0; i < studenIds.length; i++) {
-                studentList.add(studenIds[i]);
+            for (int i = 0; i < studenIds.size(); i++) {
+                studentList.add(studenIds.get(i));
             }
             comboBoxStudentsCourses.setItems(studentList);
             alert = new Alert(Alert.AlertType.INFORMATION);
@@ -191,12 +228,24 @@ public class AdminController implements Initializable {
                 if (result.get() == okButton) {
                     try {
                         Student student = tableViewDeleteStudent.getSelectionModel().getSelectedItem();
-                        boolean deleted = dbstudent.deleteStudent(student.getStudentId());
+                        boolean deleted = false;
+                        if (connectionType.equalsIgnoreCase("mysql")) {
+                            deleted = mysqlFacade.deleteStudent(student.getStudentId());
+                        } else {
+                            deleted = mongoFacade.deleteStudent(student.getStudentId());
+                        }
+
                         if (deleted) {
-                            studenIds = dbstudent.getStudentIds();
+
+                            if (connectionType.equalsIgnoreCase("mysql")) {
+                                studenIds = mysqlFacade.getStudentIds();
+                            } else {
+                                studenIds = mongoFacade.getStudentIds();
+                            }
+
                             studentList = FXCollections.observableArrayList();
-                            for (int i = 0; i < studenIds.length; i++) {
-                                studentList.add(studenIds[i]);
+                            for (int i = 0; i < studenIds.size(); i++) {
+                                studentList.add(studenIds.get(i));
                             }
                             comboBoxStudentsCourses.setItems(studentList);
                             alert = new Alert(Alert.AlertType.INFORMATION);
@@ -204,7 +253,7 @@ public class AdminController implements Initializable {
                             alert.setContentText("Student Removed Successfully!");
                             alert.setHeaderText(null);
                             alert.showAndWait();
-                            tableViewDeleteStudent.setItems(dbstudent.getStudent());
+                            tableViewDeleteStudent.setItems(mongoFacade.getStudent());
                         }
                     } catch (Exception ex) {
                         System.out.println("Cannot Delete this student because it has reference to athoer records in precourse table");
@@ -282,16 +331,27 @@ public class AdminController implements Initializable {
                         }
                     }
                     if (!enteredText.equalsIgnoreCase("")) {
-                        returnMap = databaseFacade.updateStudent(student.getStudentId(), enteredText, updateType);
+
+                        if (connectionType.equalsIgnoreCase("mysql")) {
+                            returnMap = mongoFacade.updateStudent(student.getStudentId(), enteredText, updateType);
+                        } else {
+                            returnMap = mysqlFacade.updateStudent(student.getStudentId(), enteredText, updateType);
+                        }
+
                         if (!(boolean) returnMap.get("duplicatedOccurred")) {
                             if ((boolean) returnMap.get("isUpdated")) {
-                                tableViewStudent.setItems(databaseFacade.getStudent());
+                                if (connectionType.equalsIgnoreCase("mysql")) {
+                                    tableViewStudent.setItems(mysqlFacade.getStudent());
+                                } else {
+                                    tableViewStudent.setItems(mongoFacade.getStudent());
+                                }
+
                                 alert = new Alert(Alert.AlertType.INFORMATION);
                                 alert.setTitle("Success Message");
                                 alert.setContentText("Student Updated Successfully!");
                                 alert.setHeaderText(null);
                                 alert.show();
-                                tableViewStudent.setItems(databaseFacade.getStudent());
+                                tableViewStudent.setItems(mongoFacade.getStudent());
                             }
                         } else {
                             alert = new Alert(Alert.AlertType.ERROR);
@@ -310,12 +370,21 @@ public class AdminController implements Initializable {
     @FXML
     private void handleComboBoxStudentsCourses(ActionEvent event) throws SQLException, ClassNotFoundException {
         String selectedStudent = comboBoxStudentsCourses.getValue();
-        databaseFacade.getRegisteredCourses(selectedStudent);
 
+        if (connectionType.equalsIgnoreCase("mysql")) {
+            mysqlFacade.getRegisteredCourses(selectedStudent);
+        } else {
+//            mongoFacade.getRegisteredCourses(selectedStudent);
+        }
         tableColumnStudensCoursesCourseName.setCellValueFactory(new PropertyValueFactory<>("coursename"));
         tableColumnStudensCoursesCourseSection.setCellValueFactory(new PropertyValueFactory<>("sectionnumber"));
 
-        tableViewStudensCourses.setItems(databaseFacade.getRegisteredCourses(selectedStudent));
+        if (connectionType.equalsIgnoreCase("mysql")) {
+            tableViewStudensCourses.setItems(mysqlFacade.getRegisteredCourses(selectedStudent));
+        } else {
+            tableViewStudent.setItems(mongoFacade.getStudent());
+        }
+
         vBoxTable.setVisible(true);
         tableViewStudensCourses.setVisible(true);
     }
@@ -328,7 +397,7 @@ public class AdminController implements Initializable {
 
     @FXML
     private void handleButtonAdminLogout(ActionEvent event) throws IOException {
-        
+
         viewFactory.getView("login");
     }
 

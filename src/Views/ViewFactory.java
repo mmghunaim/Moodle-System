@@ -12,10 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-/**
- *
- * @author hp
- */
+
 public class ViewFactory {
 
     private static ViewFactory viewFactory;

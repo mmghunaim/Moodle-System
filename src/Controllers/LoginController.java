@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Controllers;
 
 import java.io.IOException;
@@ -22,15 +17,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import Models.DBConnection;
+import Models.MySQLConnection;
 import Index.Index;
-import Models.DatabaseFacade;
+import Models.MySQLFacade;
 import Views.ViewFactory;
 
 /**
  * FXML Controller class
  *
- * @author WH1108
+ * @author mmgunaim
  */
 public class LoginController implements Initializable {
 
@@ -46,20 +41,19 @@ public class LoginController implements Initializable {
     private Button buttonSingin;
     @FXML
     private Button buttonExit;
-    DatabaseFacade databaseFacade ;
+
+    MySQLFacade databaseFacade;
     ViewFactory viewFactory;
-    /**
-     * Initializes the controller class.
-     */
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        databaseFacade = DatabaseFacade.getDatabaseFacade();
+        databaseFacade = MySQLFacade.getDatabaseFacade();
         viewFactory = ViewFactory.getViewFactory();
     }
 
     @FXML
     private void handelbuttonSingin(ActionEvent event) throws IOException {
-        DBConnection connection = DBConnection.getDbConnection();
+        MySQLConnection connection = MySQLConnection.getDbConnection();
         try {
             Map returnMap = connection.verifyLogin(textFiledName.getText(),
                     textFiledPassword.getText());
@@ -86,23 +80,14 @@ public class LoginController implements Initializable {
                 alert.show();
             }
         } catch (Exception ex) {
-            System.out.println("Exception occurred");
+            ex.printStackTrace();
         }
-    }
-
-    private void handleButtonSignUp(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().
-                getResource("/Views/SignUp.fxml"));
-        Scene scene = new Scene(root);
-        Stage stage = Index.getStage();
-        stage.setScene(scene);
-        stage.show();
-        databaseFacade.closeConnection();
     }
 
     @FXML
     private void handelbuttonExit(ActionEvent event) {
         databaseFacade.closeConnection();
+        System.out.println("Here The Connection Closed");
         System.exit(0);
     }
 

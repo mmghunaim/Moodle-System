@@ -35,18 +35,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.bson.Document;
 
-public class DBConnection {
+public class MySQLConnection {
 
-    private static DBConnection dbConnection;
+    private static MySQLConnection dbConnection;
     public static Connection connection;
-    private ResultSet rs;
+    
     private PreparedStatement prestatement;
     private ResultSet resultSet;
-//    static final String IP = "localhost";
-//    static final int PORT = 27017;
-//    static final String DB_NAME = "registration";
-//    static MongoCollection<Document> collection;
-
+    
     private Map statusMap;
     private String stdId = "";
     private String query;
@@ -54,7 +50,7 @@ public class DBConnection {
 
     private ConnectionState connectionState;
 
-    private DBConnection() {
+    private MySQLConnection() {
     }
 
     public ConnectionState getConnectionState() {
@@ -62,16 +58,12 @@ public class DBConnection {
     }
 
     public void setConnection(Connection connection) {
-        DBConnection.connection = connection;
+        MySQLConnection.connection = connection;
     }
 
-    public void setConnectionState(ConnectionState connectionState) {
-        this.connectionState = connectionState;
-    }
-
-    public static DBConnection getDbConnection() {
+    public static MySQLConnection getDbConnection() {
         if (dbConnection == null) {
-            dbConnection = new DBConnection();
+            dbConnection = new MySQLConnection();
         }
         return dbConnection;
     }
@@ -89,21 +81,6 @@ public class DBConnection {
         return this.resultSet;
     }
 
-    //    public static MongoCollection getCollection(String COLLECTION_NAME) {
-//        MongoClient client = new MongoClient(IP, PORT);
-//        MongoDatabase database = client.getDatabase(DB_NAME);
-//        collection = database.getCollection(COLLECTION_NAME);
-//        return collection;
-//    }
-    public void closeConnection() {
-        try {
-            this.prestatement.close();
-            this.connection.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-
     public static void writeQuery(String writer, String query) {
 
         Date date = new Date();
@@ -118,6 +95,7 @@ public class DBConnection {
                 printWriter.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
+                System.out.println("here");
             }
         }
     }
@@ -137,22 +115,13 @@ public class DBConnection {
                 if (id.equalsIgnoreCase("admin") && password.equalsIgnoreCase("admin")) {
                     statusMap.put("loginType", "admin");
                 } else {
-//                    collection = getCollection("student");
-//                    collection.find(new BasicDBObject("id", id));
-//                    BasicDBObject mquery = new BasicDBObject("id", id);
-//                    mquery.append("password", md5Password(password));
-//                    FindIterable<Document> fe = collection.find(Filters.eq("id", id));
-//                    for (Document doc : fe) {
-//                        System.out.println("RESULT OF FE " + doc.get("name"));
-//                    }
-
                     query = "SELECT * FROM student WHERE id=? AND password = ?";
                     writeQuery("System", query);
                     prestatement = getStatement("SELECT * FROM student WHERE id=? AND password = ?");
                     prestatement.setString(1, id);
                     prestatement.setString(2, md5Password(password));
-                    rs = prestatement.executeQuery();
-                    if (rs.next()) {
+                    resultSet = prestatement.executeQuery();
+                    if (resultSet.next()) {
                         stdId = id;
                         statusMap.put("loginType", "student");
                         statusMap.put("failedLogin", false);
@@ -167,6 +136,7 @@ public class DBConnection {
             }
         } catch (Exception ex) {
             ex.addSuppressed(ex);
+            
         }
         return statusMap;
     }
