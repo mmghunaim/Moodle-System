@@ -65,4 +65,28 @@ public class MongoFacade {
         return admin.showStudentBasicInfo();
     }
     
+    public ObservableList<Course> getCurrentCourses() {
+        return student.getCurrentCourses();
+    }
+    public ObservableList<Course> grades(int semesterNumber){
+        return student.grades(semesterNumber);
+    }
+    public ObservableList<RegisteredCourses> getRegisteredCourses(String studentId) {
+        return student.getRegisteredCourses(studentId);
+    }
+    public ObservableList<Section> getSections(String courseName){
+        return student.getSections(courseName);
+    }
+    public int deleteSection(String sectionName, int sectionNumber){
+        return student.deleteSection(sectionName, sectionNumber);
+    }
+    public Map updateSection(String sectionName, int sectionNumber, int preSectionNumber){
+        return student.updateSection(sectionName, sectionNumber, preSectionNumber);
+    }
+    public Map addSection(String sectionName, int sectionNumber){
+        return student.addSection(sectionName, sectionNumber);
+    }
+    public ArrayList getArrayofSections(String courseName) {
+        return student.getArrayofSections(courseName);
+    }
 }

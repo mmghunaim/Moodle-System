@@ -13,8 +13,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.bson.Document;
@@ -24,319 +30,372 @@ import org.bson.Document;
  * @author mmghunaim
  */
 public class MongoStudent {
+
+    MySQLConnection mysqlConnection = MySQLConnection.getDbConnection();
     MongoConnection mongoConnection = MongoConnection.getMongoConnection();
     MongoCollection<Document> collection;
     FindIterable<Document> documents;
     Document document;
     MongoCursor<Document> cursor;
-    
-//    public ObservableList<Course> getCurrentCourses() {
-//        
-//        DBObject lookupFields = new BasicDBObject("from", "semester");
-//        lookupFields.put("localField", "companyId");
-//        lookupFields.put("foreignField", "_id");
-//        lookupFields.put("as", "company");
-//        DBObject lookup = new BasicDBObject("$lookup", lookupFields);
+
+    private Map statusMap;
+
+    public ObservableList<Course> getCurrentCourses() {
+        ObservableList courseList
+                = FXCollections.observableArrayList();
+
+        Calendar cal = Calendar.getInstance();
+        int semesterNumber;
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        int month;
+        if (Calendar.getInstance().get(Calendar.MONTH) + 1 < 6) {
+            semesterNumber = 2;
+        } else {
+            semesterNumber = 1;
+        }
+        mongoConnection.setCollection("semester");
+        collection = mongoConnection.getCollection();
+        String smesterid = null;
+        documents = collection.find(Filters.and(
+                Filters.eq("number", semesterNumber), Filters.eq("year", String.valueOf(year))
+        ));
+        for (Document document : documents) {
+            smesterid = document.getString("id");
+        }
+        mongoConnection.setCollection("section");
+        collection = mongoConnection.getCollection();
+        documents = collection.find(Filters.and(Filters.eq("semesterid", smesterid), Filters.eq("sectionnumber", 101)));
+        String coursename = null;
+        List<String> coursesName = new ArrayList<>();
+        cursor = documents.iterator();
+
+        while (cursor.hasNext()) {
+            document = cursor.next();
+            coursesName.add(document.getString("coursename"));
+        }
+
+        mongoConnection.setCollection("course");
+        collection = mongoConnection.getCollection();
+        documents = collection.find();
+        cursor = documents.iterator();
+
+        while (cursor.hasNext()) {
+            document = cursor.next();
+            for (String courseName : coursesName) {
+                if (document.getString("name").equalsIgnoreCase(courseName)) {
+                    Course course
+                            = new Course(
+                                    document.getString("name"),
+                                    document.getString("id")
+                            );
+                    courseList.add(course);
+                }
+            }
+        }
+        return courseList;
+    }
 //
-//        Calendar cal = Calendar.getInstance();
-//        int semesterNumber;
-//        int year = Calendar.getInstance().get(Calendar.YEAR);
-//        int month;
-//        if (Calendar.getInstance().get(Calendar.MONTH) + 1 < 6) {
-//            semesterNumber = 2;
-//        } else {
-//            semesterNumber = 1;
-//        }
-//        ObservableList courseList
-//                = FXCollections.observableArrayList();
-//
-//        AggregateIterable<Document> output = mConnection.getCollection().
-//                aggregate(Arrays.asList(
-//                        Aggregates.lookup("section","coursename","name","matchedSections")
-//                ));
-//        
-//        prestatement = connection.
-//                getStatement("SELECT c.name,c.id FROM section s ,semester sm , course c "
-//                        + "WHERE s.coursename=c.name AND s.semesterid=sm.id "
-//                        + "AND sm.number= ? AND sm.year=? "
-//                        + "AND s.sectionnumber='101' ORDER BY c.name");
-//        
-//        prestatement.setInt(1, semesterNumber);
-//        prestatement.setString(2, String.valueOf(year));
-//
-//        while (connection.getResultSet().next()) {
-//            Course course
-//                    = new Course(
-//                            connection.getResultSet().getString("name"),
-//                            connection.getResultSet().getString("id")
-//                    );
-//            courseList.add(course);
-//        }
-//
-//        return courseList;
-//    }
-//
-//    public ObservableList<Course> grades(int semesterNumber) throws SQLException, ClassNotFoundException {
-//        ObservableList grades = FXCollections.observableArrayList();
-//        String year;
-//        if (semesterNumber == 1) {
-//            year = "2017";
-//        } else if (semesterNumber == 2) {
-//            year = "2018";
-//        } else if (semesterNumber == 3) {
-//            year = "2018";
-//        } else {
-//            year = "2019";
-//        }
-//
-//        String studentId = mConnection.getLoggedStudent();
-//        
-//        connection.writeQuery(connection.getLoggedStudent(), query);
-//        prestatement = connection.getStatement(
-//                "SELECT * "
-//                + "FROM precourses pc ,semester sm "
-//                + "WHERE pc.studentid=? AND pc.semesterid=sm.id AND sm.year=? AND sm.number=?");
-//        prestatement.setString(1, connection.getLoggedStudent());
-//        prestatement.setString(2, year);
-//        prestatement.setInt(3, semesterNumber);
-//
-//        connection.setResultSet(prestatement.executeQuery());
-//        while (connection.getResultSet().next()) {
-//            Course grade
-//                    = new Course(
-//                            connection.getResultSet().getString("courseid"),
-//                            connection.getResultSet().getDouble("grade")
-//                    );
-//            grades.add(grade);
-//        }
-//        return grades;
-//    }
+
+    public ObservableList<Course> grades(int semesterNumber) {
+        ObservableList grades = FXCollections.observableArrayList();
+        String year;
+        if (semesterNumber == 1) {
+            year = "2017";
+        } else if (semesterNumber == 2) {
+            year = "2018";
+        } else if (semesterNumber == 3) {
+            year = "2018";
+        } else {
+            year = "2019";
+        }
+
+        String studentId = mysqlConnection.getLoggedStudent();
+
+        mongoConnection.setCollection("semester");
+        collection = mongoConnection.getCollection();
+        String smesterid = null;
+        documents = collection.find(Filters.and(
+                Filters.eq("number", semesterNumber), Filters.eq("year", String.valueOf(year))
+        ));
+        for (Document document : documents) {
+            smesterid = document.getString("id");
+        }
+
+        mongoConnection.setCollection("precourses");
+        collection = mongoConnection.getCollection();
+        documents = collection.find(Filters.and(
+                Filters.eq("studentid", studentId), Filters.eq("semesterid", smesterid)
+        ));
+        cursor = documents.iterator();
+        while (cursor.hasNext()) {
+            document = cursor.next();
+            Course grade
+                    = new Course(
+                            document.getString("courseid"),
+                            document.getDouble("grade")
+                    );
+            grades.add(grade);
+
+        }
+        return grades;
+    }
 //    
-//    public ObservableList<RegisteredCourses> getRegisteredCourses(String studentId) {
-//        ObservableList registeredCoursesList
-//                = FXCollections.observableArrayList();
-//        
-//        
-//        if (studentId == null) {
-//            documents = mConnection.getCollection().find(Filters.eq("id", mConnection.getLoggedStudent()));
-//        } else {
-//            documents = mConnection.getCollection().find(Filters.eq("id", studentId));
-//        }
-//        cursor = documents.iterator();
-//
-//        while (cursor.hasNext()) {
-//            document = cursor.next();
-//            if (studentId == null) {
-//                RegisteredCourses registeredCourses
-//                        = new RegisteredCourses(
-//                                document.getString("studentid"),
-//                                document.getString("coursename"),
-//                                document.getInteger("sectionnumber"),
-//                                document.getString("starttime"),
-//                                document.getString("endtime"),
-//                                document.getString("instructor"),
-//                                document.getString("lab"),
-//                                document.getString("days")
-//                        );
-//                registeredCoursesList.add(registeredCourses);
-//            } else {
-//                RegisteredCourses registeredCourses
-//                        = new RegisteredCourses(
-//                                document.getString("coursename"),
-//                                document.getInteger("sectionnumber"));
-//                registeredCoursesList.add(registeredCourses);
-//            }
-//        }
-//        return registeredCoursesList;
-//    }
+
+    public ObservableList<RegisteredCourses> getRegisteredCourses(String studentId) {
+        ObservableList registeredCoursesList
+                = FXCollections.observableArrayList();
+
+        mongoConnection.setCollection("regcourses");
+        collection = mongoConnection.getCollection();
+        if (studentId.equalsIgnoreCase("")) {
+            documents = collection.find(Filters.eq("stdId", mysqlConnection.getLoggedStudent()));
+        } else {
+            documents = collection.find(Filters.eq("stdId", studentId));
+        }
+        cursor = documents.iterator();
+
+        while (cursor.hasNext()) {
+            document = cursor.next();
+            if (studentId == null) {
+                RegisteredCourses registeredCourses
+                        = new RegisteredCourses(
+                                document.getString("studentid"),
+                                document.getString("coursename"),
+                                document.getInteger("sectionnumber"),
+                                document.getString("starttime"),
+                                document.getString("endtime"),
+                                document.getString("instructor"),
+                                document.getString("lab"),
+                                document.getString("days")
+                        );
+                registeredCoursesList.add(registeredCourses);
+            } else {
+                RegisteredCourses registeredCourses
+                        = new RegisteredCourses(
+                                document.getString("sectionName"),
+                                document.getInteger("sectionNumber"));
+                registeredCoursesList.add(registeredCourses);
+            }
+        }
+        return registeredCoursesList;
+    }
 //    
-//    public ObservableList<Section> getSections(String courseName) throws ClassNotFoundException, SQLException {
-//        //getStatement();
-//        ObservableList sectionList = FXCollections.observableArrayList();
-//        query = "SELECT * FROM section s,instructor i WHERE coursename=? AND s.instructorid=i.id";
-//        writeQuery(connection.getLoggedStudent(), query);
-//        prestatement
-//                = connection.getStatement("SELECT * FROM section s,instructor i WHERE coursename=? AND s.instructorid=i.id");
-//        prestatement.setString(1, courseName);
-//        connection.setResultSet(prestatement.executeQuery());
-//        while (connection.getResultSet().next()) {
-//            Section section
-//                    = new Section(
-//                            connection.getResultSet().getInt("sectionnumber"),
-//                            connection.getResultSet().getString("lab"),
-//                            connection.getResultSet().getString("name"),
-//                            connection.getResultSet().getString("days"),
-//                            connection.getResultSet().getString("starttime"),
-//                            connection.getResultSet().getString("endtime")
-//                    );
-//            sectionList.add(section);
-//        }
-//        return sectionList;
-//    }
+
+    public ObservableList<Section> getSections(String courseName) {
+        //getStatement();
+        ObservableList sectionList = FXCollections.observableArrayList();
+
+        mongoConnection.setCollection("instructor ");
+        collection = mongoConnection.getCollection();
+
+        Map<String, String> instructors = new HashMap<>();
+        documents = collection.find();
+        for (Document document : documents) {
+            instructors.put(document.getString("id"), document.getString("name"));
+        }
+
+        mongoConnection.setCollection("section");
+        collection = mongoConnection.getCollection();
+        documents = collection.find(Filters.eq("coursename", courseName));
+        cursor = documents.iterator();
+
+        String instructorName = null;
+
+        while (cursor.hasNext()) {
+            this.document = cursor.next();
+            if (instructors.containsKey(document.getString("instructorid"))) {
+                instructorName = document.getString("name");
+            }
+            Section section
+                    = new Section(
+                            this.document.getInteger("sectionnumber"),
+                            this.document.getString("lab"),
+                            instructorName,
+                            this.document.getString("days"),
+                            this.document.getString("starttime"),
+                            this.document.getString("endtime")
+                    );
+            sectionList.add(section);
+
+        }
+        return sectionList;
+    }
 //
-//    public int deleteSection(String sectionName, int sectionNumber) throws ClassNotFoundException, SQLException {
-//        //getStatement();
-//        query = "DELETE FROM regcourses WHERE coursename=? AND sectionnumber=? AND studentid=?";
-//        writeQuery(connection.getLoggedStudent(), query);
-//        prestatement = connection.getStatement("DELETE FROM regcourses WHERE coursename=? AND sectionnumber=? AND studentid=?");
-//        prestatement.setString(1, sectionName);
-//        prestatement.setInt(2, sectionNumber);
-//        prestatement.setString(3, connection.getLoggedStudent());
-//        int success = prestatement.executeUpdate();
-//        if (success != 0) {
-//            return 1;
-//        }
-//        return 0;
-//    }
+
+    public int deleteSection(String sectionName, int sectionNumber) {
+
+        mongoConnection.setCollection("regcourses");
+        collection = mongoConnection.getCollection();
+        DeleteResult dr = collection.deleteOne(Filters.and(
+                Filters.eq("coursename", sectionName),
+                Filters.eq("sectionnumber", sectionNumber),
+                Filters.eq("studentid", mysqlConnection.getLoggedStudent())
+        ));
+        if (dr.getDeletedCount() != 0) {
+            return 1;
+        }
+        return 0;
+
+    }
 //
-//    public Map updateSection(String sectionName, int sectionNumber, int preSectionNumber) throws ClassNotFoundException, SQLException {
-//        statusMap = new HashMap();
-//        statusMap.put("updated", false);
-//        statusMap.put("conflict", false);
-//        //getStatement();
-//        query = "SELECT days,starttime,endtime FROM section WHERE coursename=? AND sectionnumber=?";
-//        writeQuery(connection.getLoggedStudent(), query);
-//        prestatement = connection.getStatement("SELECT days,starttime,endtime FROM section WHERE coursename=? AND sectionnumber=?");
-//        prestatement.setString(1, sectionName);
-//        prestatement.setInt(2, sectionNumber);
-//        connection.setResultSet(prestatement.executeQuery());
-//        String days = "";
-//        String starttime = "";
-//        String endtime = "";
-//        while (connection.getResultSet().next()) {
-//            days = connection.getResultSet().getString("days");
-//            starttime = connection.getResultSet().getString("starttime");
-//            endtime = connection.getResultSet().getString("endtime");
-//        }
-//        query = "SELECT * FROM regcourses WHERE starttime=? AND endtime=? AND days=? AND studentid=?";
-//        writeQuery(connection.getLoggedStudent(), query);
-//        prestatement = connection.getStatement("SELECT * FROM regcourses WHERE starttime=? AND endtime=? AND days=? AND studentid=?");
-//        prestatement.setString(1, starttime);
-//        prestatement.setString(2, endtime);
-//        prestatement.setString(3, days);
-//        prestatement.setString(4, connection.getLoggedStudent());
-//        connection.setResultSet(prestatement.executeQuery());
-//        if (connection.getResultSet().next()) {
-//            statusMap.put("conflict", true);
-//        } else {
-//            query = "UPDATE regcourses SET sectionnumber=?,days=?"
-//                    + " WHERE coursename=? AND sectionnumber=? AND studentid=?";
-//            writeQuery(connection.getLoggedStudent(), query);
-//            prestatement = connection.getStatement("UPDATE regcourses SET sectionnumber=?,days=?"
-//                    + " WHERE coursename=? AND sectionnumber=? AND studentid=?");
-//            prestatement.setInt(1, sectionNumber);
-//            prestatement.setString(2, days);
-//            prestatement.setString(3, sectionName);
-//            prestatement.setInt(4, preSectionNumber);
-//            prestatement.setString(5, connection.getLoggedStudent());
-//            prestatement.executeUpdate();
-//            statusMap.put("updated", true);
-//        }
-//        return statusMap;
-//    }
+
+    public Map updateSection(String sectionName, int sectionNumber, int preSectionNumber) {
+        statusMap = new HashMap();
+        statusMap.put("updated", false);
+        statusMap.put("conflict", false);
+        //getStatement();
+
+        mongoConnection.setCollection("section");
+        collection = mongoConnection.getCollection();
+        documents = collection.find(Filters.and(
+                Filters.eq("coursename", sectionName),
+                Filters.eq("sectionnumber", sectionNumber)));
+        cursor = documents.iterator();
+
+        String days = "";
+        String starttime = "";
+        String endtime = "";
+
+        while (cursor.hasNext()) {
+            document = cursor.next();
+            days = document.getString("days");
+            starttime = document.getString("starttime");
+            endtime = document.getString("endtime");
+        }
+
+        mongoConnection.setCollection("regcourses");
+        collection = mongoConnection.getCollection();
+        documents = collection.find(Filters.and(
+                Filters.eq("starttime", starttime),
+                Filters.eq("endtime", endtime),
+                Filters.eq("days", days),
+                Filters.eq("studentid", mysqlConnection.getLoggedStudent())));
+        cursor = documents.iterator();
+
+        if (cursor.hasNext()) {
+            statusMap.put("conflict", true);
+        } else {
+            mongoConnection.setCollection("regcourses");
+            collection = mongoConnection.getCollection();
+            UpdateResult isUpdated = collection.updateOne(
+                    Filters.and(
+                            Filters.eq("coursename", sectionName),
+                            Filters.eq("sectionnumber", preSectionNumber),
+                            Filters.eq("studentid", mysqlConnection.getLoggedStudent())),
+                    new Document("$set", new Document("sectionnumber", sectionNumber)
+                            .append("days", days)));
+
+            statusMap.put("updated", true);
+        }
+
+        return statusMap;
+    }
 //
 //    //db courses
-//    public Map addSection(String sectionName, int sectionNumber) throws ClassNotFoundException, SQLException {
-//        statusMap = new HashMap();
-//        statusMap.put("isAdded", false);
-//        statusMap.put("isExist", false);
-//        statusMap.put("conflictExist", false);
+
+    public Map addSection(String sectionName, int sectionNumber){
+        statusMap = new HashMap();
+        statusMap.put("isAdded", false);
+        statusMap.put("isExist", false);
+        statusMap.put("conflictExist", false);
+
+        mongoConnection.setCollection("regcourses");
+        collection = mongoConnection.getCollection();
+        documents = collection.find(Filters.and(
+                Filters.eq("coursename", sectionName),
+                Filters.eq("studentid", mysqlConnection.getLoggedStudent())));
+        cursor = documents.iterator();
+
+        if (cursor.hasNext()) {
+            statusMap.put("isExist", true);
+        } else {
+            String instructor = "";
+            String starttime = "";
+            String endtime = "";
+            String days = "";
+            String lab = "";
+
+            mongoConnection.setCollection("instructor");
+            collection = mongoConnection.getCollection();
+
+            Map<String, String> instructors = new HashMap<>();
+            documents = collection.find();
+            for (Document document : documents) {
+                instructors.put(document.getString("id"), document.getString("name"));
+            }
+
+            mongoConnection.setCollection("section");
+            collection = mongoConnection.getCollection();
+            documents = collection.find(Filters.and(
+                    Filters.eq("coursename", sectionName),
+                    Filters.eq("sectionnumber", sectionNumber)));
+            cursor = documents.iterator();
+            String instructorName = null;
+            while (cursor.hasNext()) {
+                this.document = cursor.next();
+                if (instructors.containsKey(document.getString("instructorid"))) {
+                    instructorName = document.getString("name");
+                }
+                instructor = instructorName;
+                starttime = document.getString("starttime");
+                endtime = document.getString("endtime");
+                days = document.getString("days");
+                lab = document.getString("lab");
+            }
+
+            mongoConnection.setCollection("regcourses");
+            collection = mongoConnection.getCollection();
+            documents = collection.find(Filters.and(
+                    Filters.eq("starttime", starttime),
+                    Filters.eq("endtime", endtime),
+                    Filters.eq("days", days),
+                    Filters.eq("studentid", mysqlConnection.getLoggedStudent())));
+            cursor = documents.iterator();
+            if (cursor.hasNext()) {
+                statusMap.put("conflictExist", true);
+            } else {
+                int semesterNumber;
+                int year = Calendar.getInstance().get(Calendar.YEAR);
+                int month;
+                if (Calendar.getInstance().get(Calendar.MONTH) < 6) {
+                    semesterNumber = 2;
+                } else {
+                    semesterNumber = 1;
+                }
+
+                mongoConnection.setCollection("regcourses");
+                collection = mongoConnection.getCollection();
+                System.out.println(sectionName+starttime+endtime);
+                
+                collection.insertOne(new Document(
+                    "stdId", mysqlConnection.getLoggedStudent())
+                    .append("sectionName", sectionName)
+                                .append("starttime", starttime)
+                                .append("endtime", endtime)
+                                .append("sectionNumber", sectionNumber)
+                                .append("instructor", instructor)
+                                .append("lab", lab)
+                                .append("days", days)
+            );
+                statusMap.put("isAdded", true);
+            }
+        }
+
+        return statusMap;
+    }
 //
-//        //getStatement();
-//        query = "SELECT * FROM regcourses WHERE coursename=? AND studentid=?";
-//        writeQuery(connection.getLoggedStudent(), query);
-//        prestatement = connection.getStatement("SELECT * FROM regcourses WHERE coursename=? AND studentid=?");
-//        prestatement.setString(1, sectionName);
-//        prestatement.setString(2, connection.getLoggedStudent());
-//        connection.setResultSet(prestatement.executeQuery());
-//        if (connection.getResultSet().next()) {
-//            statusMap.put("isExist", true);
-//        } else {
-//            query = "SELECT * FROM section s,instructor i "
-//                    + "WHERE coursename=? AND sectionnumber=? AND s.instructorid=i.id";
-//            writeQuery(connection.getLoggedStudent(), query);
-//            prestatement = connection.getStatement("SELECT * FROM section s,instructor i "
-//                    + "WHERE coursename=? AND sectionnumber=? AND s.instructorid=i.id");
-//            prestatement.setString(1, sectionName);
-//            prestatement.setInt(2, sectionNumber);
-//
-//            connection.setResultSet(prestatement.executeQuery());
-//            String instructor = "";
-//            String starttime = "";
-//            String endtime = "";
-//            String days = "";
-//            String lab = "";
-//            while (connection.getResultSet().next()) {
-//                instructor = connection.getResultSet().getString("name");
-//                starttime = connection.getResultSet().getString("starttime");
-//                endtime = connection.getResultSet().getString("endtime");
-//                days = connection.getResultSet().getString("days");
-//                lab = connection.getResultSet().getString("lab");
-//            }
-//            query = "SELECT * FROM regcourses "
-//                    + "WHERE starttime=? AND endtime=? AND days=? AND studentid=?";
-//            writeQuery(connection.getLoggedStudent(), query);
-//            prestatement = connection.getStatement("SELECT * FROM regcourses "
-//                    + "WHERE starttime=? AND endtime=? AND days=? AND studentid=?");
-//            prestatement.setString(1, starttime);
-//            prestatement.setString(2, endtime);
-//            prestatement.setString(3, days);
-//            prestatement.setString(4, connection.getLoggedStudent());
-//            connection.setResultSet(prestatement.executeQuery());
-//            if (connection.getResultSet().next()) {
-//                statusMap.put("conflictExist", true);
-//            } else {
-//                int semesterNumber;
-//                int year = Calendar.getInstance().get(Calendar.YEAR);
-//                int month;
-//                if (Calendar.getInstance().get(Calendar.MONTH) < 6) {
-//                    semesterNumber = 2;
-//                } else {
-//                    semesterNumber = 1;
-//                }
-//                query = "INSERT INTO regcourses "
-//                        + "VALUES(stdId,sectionName,starttime,endtime,sectionNumber,instructor,lab,days)";
-//                writeQuery(connection.getLoggedStudent(), query);
-//                prestatement
-//                        = connection.getStatement("INSERT INTO regcourses "
-//                                + "VALUES(?,?,?,?,?,?,?,?,?,?)");
-//                prestatement.setString(1, connection.getLoggedStudent());
-//                prestatement.setString(2, sectionName);
-//                prestatement.setString(3, starttime);
-//                prestatement.setString(4, endtime);
-//                prestatement.setInt(5, sectionNumber);
-//                prestatement.setString(6, instructor);
-//                prestatement.setString(7, lab);
-//                prestatement.setString(8, days);
-//                prestatement.setInt(9, semesterNumber);
-//                prestatement.setInt(10, year);
-//
-//                int success = prestatement.executeUpdate();
-//                if (success != 0) {
-//                    statusMap.put("isAdded", true);
-//                }
-//            }
-//        }
-//        return statusMap;
-//    }
-//
-//    public int[] getArrayofSections(String courseName) throws SQLException, ClassNotFoundException {
-//        int length = 0;
-//        query = "SELECT sectionnumber FROM section WHERE coursename=?";
-//        writeQuery(connection.getLoggedStudent(), query);
-//        prestatement = connection.getStatement("SELECT sectionnumber FROM section WHERE coursename=?");
-//        prestatement.setString(1, courseName);
-//        connection.setResultSet(prestatement.executeQuery());
-//        while (connection.getResultSet().next()) {
-//            length++;
-//        }
-//        connection.getResultSet().beforeFirst();
-//        int count = 0;
-//        int[] sections = new int[length];
-//        while (connection.getResultSet().next()) {
-//            sections[count] = connection.getResultSet().getInt("sectionnumber");
-//            count++;
-//        }
-//        return sections;
-//    }
+    public ArrayList getArrayofSections(String courseName) {
+        ArrayList<Integer> sections = new ArrayList<>();
+        
+        mongoConnection.setCollection("section");
+        collection = mongoConnection.getCollection();
+        documents = collection.find(Filters.eq("coursename", courseName));
+        cursor = documents.iterator();
+
+        while (cursor.hasNext()) {
+            document = cursor.next();
+            sections.add(document.getInteger("sectionnumber"));
+        }
+        return sections;
+    }
 }

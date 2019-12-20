@@ -98,7 +98,7 @@ public class AdminController implements Initializable {
     ArrayList<String> studenIds;
     Optional<ButtonType> result;
 
-    private String connectionType = "mongo";
+    private String connectionType = "mysql";
 
     MySQLFacade mysqlFacade;
     MongoFacade mongoFacade;
